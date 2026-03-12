@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Environment files and secrets
+.env
+.env.*
+client/.env
+client/.env.*
+server/.env
+server/.env.*
+!.env.example
+!client/.env.example
+!server/.env.example
+
+# Build output
+dist/
+build/
+coverage/
+.vite/
+.cache/
+*.tsbuildinfo
+client/dist/
+server/dist/
+client/coverage/
+server/coverage/
+
+# Runtime and generated data
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+server/uploads/
+uploads/
+server/artifacts/
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Test and local tooling
+client/node_modules/.vite/
+client/.vitest/
+server/.nyc_output/
