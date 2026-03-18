@@ -48,7 +48,7 @@ const register = async (req, res) => {
                     company: requiresCompany(requestedRole) ? sanitizedCompany : ''
                 }
             },
-            { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
+            { returnDocument: 'after', upsert: true, runValidators: true, setDefaultsOnInsert: true }
         );
 
         console.log('User synced in MongoDB:', user._id);
@@ -88,7 +88,7 @@ const login = async (req, res) => {
                         role: 'candidate'
                     }
                 },
-                { new: true, upsert: true, setDefaultsOnInsert: true }
+                { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true }
             );
         }
 
@@ -111,7 +111,7 @@ const getMe = async (req, res) => {
                     role: 'candidate'
                 }
             },
-            { new: true, upsert: true, setDefaultsOnInsert: true }
+            { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true }
         );
         res.status(200).json({ success: true, user });
     } catch (error) {

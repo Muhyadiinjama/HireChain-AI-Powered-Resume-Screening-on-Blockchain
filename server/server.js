@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 
-dotenv.config();
+dotenv.config({ quiet: true });
 // mongoose.set('debug', true); // Disabled for cleaner terminal output
 const admin = require('firebase-admin');
 

@@ -240,7 +240,7 @@ const Register = ({ isEmbed = false }: RegisterProps) => {
     }
 
     return (
-        <div className="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-12 relative overflow-hidden transition-colors duration-300">
+        <div className="min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-80px)] flex items-start justify-center px-4 py-8 md:py-12 relative overflow-hidden transition-colors duration-300">
             {/* Decorative Background */}
             <div className="absolute top-0 left-0 w-full h-full -z-10 bg-gray-50 dark:bg-dark-main overflow-hidden transition-colors duration-300">
                 <div className="absolute top-[10%] left-[5%] w-[40%] h-[40%] bg-brand-primary/10 dark:bg-brand-primary/20 rounded-full blur-[120px] transition-colors duration-300" />

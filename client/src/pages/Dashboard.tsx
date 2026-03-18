@@ -555,14 +555,14 @@ const Dashboard = () => {
     const currentStats: DashboardStat[] = user.role === 'admin' ? recruiterStats : (user.role === 'recruiter' ? recruiterStats : candidateStats);
 
     return (
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 transition-colors duration-300">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-12 transition-colors duration-300">
             {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 md:mb-12 space-y-6 lg:space-y-0">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 md:mb-12 space-y-4 md:space-y-6 lg:space-y-0">
                 <div>
                     <h1 className="text-2xl md:text-4xl font-black tracking-tight-custom text-gray-900 dark:text-white mb-2 transition-colors duration-300">
                         {user.role === 'admin' ? 'Admin Dashboard' : (user.role === 'recruiter' ? 'Recruiter Dashboard' : 'Candidate Dashboard')}
                     </h1>
-                    <p className="text-gray-500 dark:text-gray-400 text-base md:text-lg font-medium transition-colors duration-300">
+                    <p className="text-sm md:text-lg text-gray-500 dark:text-gray-400 font-medium transition-colors duration-300">
                         {user.role === 'admin'
                             ? 'Complete platform oversight and system-wide analytics'
                             : user.role === 'recruiter'
@@ -570,18 +570,11 @@ const Dashboard = () => {
                                 : 'Find your next opportunity with AI-powered matching'}
                     </p>
                 </div>
-                <div className="flex items-center space-x-3 md:space-x-4">
-                    <button
-                        onClick={handleRefresh}
-                        disabled={isRefreshing}
-                        className={`p-3 bg-white dark:bg-dark-surface border border-gray-100 dark:border-gray-700 rounded-2xl shadow-sm text-gray-400 dark:text-gray-300 hover:text-brand-primary dark:hover:text-brand-primary hover:border-brand-primary/20 dark:hover:border-brand-primary/20 transition-all active:scale-95 ${isRefreshing ? 'animate-spin' : ''}`}
-                    >
-                        <Clock size={20} />
-                    </button>
+                <div className="flex items-center space-x-2 md:space-x-4">
                     {(user.role === 'recruiter' || user.role === 'admin') && (
                         <button
                             onClick={() => navigate('/create-job')}
-                            className="flex-1 md:flex-none bg-brand-primary text-white px-6 md:px-8 py-3 rounded-2xl font-bold flex items-center justify-center space-x-2 shadow-lg hover:bg-brand-primary/95 transition-all active:scale-95 text-sm md:text-base"
+                            className="flex-1 md:flex-none bg-brand-primary text-white px-5 md:px-8 py-2.5 md:py-3 rounded-xl md:rounded-2xl font-bold flex items-center justify-center space-x-2 shadow-lg hover:bg-brand-primary/95 transition-all active:scale-95 text-sm md:text-base"
                         >
                             <Plus size={20} />
                             <span>Post New Job</span>
@@ -591,7 +584,7 @@ const Dashboard = () => {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-8 md:mb-12">
                 {currentStats.map((stat, i) => (
                     <div
                         key={i}
@@ -609,7 +602,7 @@ const Dashboard = () => {
                                 }
                             }
                         }}
-                        className={`bg-white dark:bg-dark-surface p-6 rounded-[32px] border border-gray-50 dark:border-gray-800 shadow-sm relative overflow-hidden group hover:shadow-md transition-all cursor-pointer active:scale-95`}
+                        className={`bg-white dark:bg-dark-surface p-4 md:p-6 rounded-[22px] md:rounded-[32px] border border-gray-50 dark:border-gray-800 shadow-sm relative overflow-hidden group hover:shadow-md transition-all cursor-pointer active:scale-95`}
                     >
                         <div className={`absolute inset-0 bg-white/20 dark:bg-dark-main/20 backdrop-blur-[1px] flex items-center justify-center opacity-0 transition-opacity ${isRefreshing ? 'opacity-100' : 'pointer-events-none'}`}>
                             <div className="w-8 h-8 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
@@ -1034,18 +1027,18 @@ const Dashboard = () => {
             )}
 
             {/* Tabs */}
-            <div className="flex p-1 bg-gray-100 dark:bg-dark-surface rounded-2xl mb-8 w-full md:w-fit overflow-x-auto transition-colors duration-300 no-scrollbar">
+            <div className="flex p-1 bg-gray-100 dark:bg-dark-surface rounded-xl md:rounded-2xl mb-6 md:mb-8 w-full md:w-fit overflow-x-auto transition-colors duration-300 no-scrollbar">
                 {(user.role === 'recruiter' || user.role === 'admin') ? (
                     <>
                         <button
                             onClick={() => setActiveTab('jobs')}
-                            className={`px-5 md:px-8 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'jobs' ? 'bg-white dark:bg-dark-surface text-brand-primary dark:text-brand-primary shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
+                            className={`px-4 md:px-8 py-2.5 rounded-lg md:rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'jobs' ? 'bg-white dark:bg-dark-surface text-brand-primary dark:text-brand-primary shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
                         >
                             Manage Jobs
                         </button>
                         <button
                             onClick={() => setActiveTab('candidates')}
-                            className={`px-5 md:px-8 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'candidates' ? 'bg-white dark:bg-dark-surface text-brand-primary dark:text-brand-primary shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
+                            className={`px-4 md:px-8 py-2.5 rounded-lg md:rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'candidates' ? 'bg-white dark:bg-dark-surface text-brand-primary dark:text-brand-primary shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
                         >
                             Candidate List
                         </button>
@@ -1054,13 +1047,13 @@ const Dashboard = () => {
                     <>
                         <button
                             onClick={() => setActiveTab('browse')}
-                            className={`px-5 md:px-8 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'browse' ? 'bg-white dark:bg-dark-surface text-brand-primary dark:text-brand-primary shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
+                            className={`px-4 md:px-8 py-2.5 rounded-lg md:rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'browse' ? 'bg-white dark:bg-dark-surface text-brand-primary dark:text-brand-primary shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
                         >
                             Browse Jobs
                         </button>
                         <button
                             onClick={() => setActiveTab('history')}
-                            className={`px-5 md:px-8 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'history' ? 'bg-white dark:bg-dark-surface text-brand-primary dark:text-brand-primary shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
+                            className={`px-4 md:px-8 py-2.5 rounded-lg md:rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'history' ? 'bg-white dark:bg-dark-surface text-brand-primary dark:text-brand-primary shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
                         >
                             Application History
                         </button>
@@ -1069,11 +1062,11 @@ const Dashboard = () => {
             </div>
 
             {/* Main Content Area */}
-            <div className="bg-white dark:bg-dark-main rounded-[40px] shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors duration-300">
+            <div className="bg-white dark:bg-dark-main rounded-[28px] md:rounded-[40px] shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors duration-300">
                 {/* --- RECRUITER: JOBS TAB --- */}
                 {(user.role === 'recruiter' || user.role === 'admin') && activeTab === 'jobs' && (
                     <>
-                        <div className="p-6 md:p-8 border-b border-gray-50 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors duration-300">
+                        <div className="p-5 md:p-8 border-b border-gray-50 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors duration-300">
                             <div>
                                 <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">Job Posts</h3>
                                 <p className="text-gray-500 dark:text-gray-400 text-xs md:text-sm mt-1 transition-colors duration-300">Manage and monitor all job postings</p>
@@ -1191,7 +1184,7 @@ const Dashboard = () => {
                 {/* --- RECRUITER: CANDIDATES TAB --- */}
                 {(user.role === 'recruiter' || user.role === 'admin') && activeTab === 'candidates' && (
                     <>
-                        <div className="p-6 md:p-8 border-b border-gray-50 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-6 transition-colors duration-300">
+                        <div className="p-5 md:p-8 border-b border-gray-50 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-6 transition-colors duration-300">
                             <div>
                                 <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">Candidate List</h3>
                                 <p className="text-gray-500 dark:text-gray-400 text-xs md:text-sm mt-1 transition-colors duration-300">AI-screened candidates with match scores</p>
@@ -1412,31 +1405,31 @@ const Dashboard = () => {
                 {/* --- CANDIDATE: BROWSE TAB --- */}
                 {user.role === 'candidate' && activeTab === 'browse' && (
                     <>
-                        <div className="p-8 border-b border-gray-50 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors duration-300">
+                        <div className="p-5 md:p-8 border-b border-gray-50 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors duration-300">
                             <div>
-                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">Available Positions</h3>
+                                <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">Available Positions</h3>
                                 <p className="text-gray-500 dark:text-gray-400 text-sm mt-1 transition-colors duration-300">{filteredJobs.length} jobs match your search</p>
                             </div>
-                            <div className="flex space-x-2">
-                                <div className="relative">
+                            <div className="flex w-full md:w-auto space-x-2">
+                                <div className="relative flex-1 md:flex-none">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                                     <input placeholder="Search jobs..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full sm:w-auto sm:min-w-[250px] pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white border-none rounded-xl text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-colors duration-300" />
                                 </div>
                                 <button className="p-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"><Filter size={18} /></button>
                             </div>
                         </div>
-                        <div className="p-8">
+                        <div className="p-5 md:p-8">
                             <div className="space-y-6">
                                 {filteredJobs.length > 0 ? filteredJobs.map((job) => (
-                                    <div key={job._id} className="p-6 bg-white dark:bg-dark-surface border border-gray-200 dark:border-gray-800 rounded-2xl hover:border-gray-300 dark:hover:border-gray-700 transition-colors shadow-sm group">
+                                    <div key={job._id} className="p-5 md:p-6 bg-white dark:bg-dark-surface border border-gray-200 dark:border-gray-800 rounded-xl md:rounded-2xl hover:border-gray-300 dark:hover:border-gray-700 transition-colors shadow-sm group">
                                         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                                             {/* Left: Icon, Title, Company */}
-                                            <div className="flex items-start space-x-5 flex-1">
-                                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-primary via-brand-secondary to-brand-accent flex items-center justify-center text-white shrink-0 shadow-md transform group-hover:scale-105 transition-transform">
-                                                    <Building2 size={24} />
+                                            <div className="flex items-start space-x-4 md:space-x-5 flex-1">
+                                                <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-brand-primary via-brand-secondary to-brand-accent flex items-center justify-center text-white shrink-0 shadow-md transform group-hover:scale-105 transition-transform">
+                                                    <Building2 size={20} />
                                                 </div>
                                                 <div>
-                                                    <h4 className="text-[20px] font-bold text-gray-900 dark:text-white leading-tight group-hover:text-brand-primary transition-colors">{job.title}</h4>
+                                                    <h4 className="text-lg md:text-[20px] font-bold text-gray-900 dark:text-white leading-tight group-hover:text-brand-primary transition-colors">{job.title}</h4>
                                                     <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mt-1">{job.company || 'TechCorp Inc.'}</p>
                                                     
                                                     {/* Metadata Row */}
@@ -1450,11 +1443,11 @@ const Dashboard = () => {
                                             </div>
                                             
                                             {/* Right: Actions */}
-                                            <div className="flex flex-col items-end shrink-0 min-w-[160px] md:mt-0 mt-4">
-                                                <button onClick={() => navigate(`/upload/${job._id}`)} className="w-full py-2.5 bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center space-x-2">
+                                            <div className="flex flex-col items-stretch md:items-end shrink-0 min-w-[160px] md:mt-0 mt-4">
+                                                <button onClick={() => navigate(`/upload/${job._id}`)} className="w-full py-2.5 bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent text-white rounded-lg md:rounded-xl text-sm font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center space-x-2">
                                                     <Upload size={16} /><span>Apply Now</span>
                                                 </button>
-                                                <button onClick={() => navigate(`/job/${job._id}`)} className="flex items-center justify-end w-full space-x-2 text-gray-700 dark:text-gray-300 font-bold text-sm hover:text-gray-900 dark:hover:text-white transition-colors mt-4 pr-1">
+                                                <button onClick={() => navigate(`/job/${job._id}`)} className="flex items-center justify-center md:justify-end w-full space-x-2 text-gray-700 dark:text-gray-300 font-bold text-sm hover:text-gray-900 dark:hover:text-white transition-colors mt-3 md:mt-4 pr-0 md:pr-1">
                                                     <Eye size={16} className="text-gray-500 dark:text-gray-400" />
                                                     <span>View Details</span>
                                                 </button>
@@ -1473,7 +1466,7 @@ const Dashboard = () => {
                                             ))}
                                         </div>
                                     </div>
-                                )) : <div className="p-20 text-center text-gray-400 dark:text-gray-500">No jobs found</div>}
+                                )) : <div className="p-14 md:p-20 text-center text-gray-400 dark:text-gray-500">No jobs found</div>}
                             </div>
                         </div>
                     </>
@@ -1482,15 +1475,15 @@ const Dashboard = () => {
                 {/* --- CANDIDATE: HISTORY TAB --- */}
                 {user.role === 'candidate' && activeTab === 'history' && (
                     <>
-                        <div className="p-8 border-b border-gray-50 dark:border-gray-800 transition-colors duration-300">
-                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">Application History</h3>
+                        <div className="p-5 md:p-8 border-b border-gray-50 dark:border-gray-800 transition-colors duration-300">
+                            <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">Application History</h3>
                             <p className="text-gray-500 dark:text-gray-400 text-sm mt-1 transition-colors duration-300">Track status changes, recruiter review progress, and AI screening results</p>
                         </div>
                         <div className="divide-y divide-gray-50 dark:divide-gray-800 transition-colors duration-300">
                             {applications.length > 0 ? applications.map((app) => {
                                 const statusMeta = getApplicationStatusMeta(app.applicationStatus);
                                 return (
-                                <div key={app._id} className="p-8 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors">
+                                <div key={app._id} className="p-5 md:p-8 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors">
                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                                         <div className="flex-1">
                                             <div className="flex flex-wrap items-center gap-3 mb-2">

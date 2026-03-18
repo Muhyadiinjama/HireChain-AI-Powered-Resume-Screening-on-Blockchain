@@ -111,7 +111,7 @@ const updateJob = async (req, res) => {
             company: resolveJobCompany({ company: req.body.company || job.company }, req.dbUser)
         };
 
-        const updatedJob = await Job.findByIdAndUpdate(req.params.id, payload, { new: true }).populate('createdBy');
+        const updatedJob = await Job.findByIdAndUpdate(req.params.id, payload, { returnDocument: 'after' }).populate('createdBy');
         const normalizedJob = applyResolvedCompany(updatedJob);
         res.status(200).json({ success: true, job: normalizedJob });
     } catch (error) {

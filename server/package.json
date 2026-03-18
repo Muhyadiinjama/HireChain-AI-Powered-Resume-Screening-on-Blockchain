@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js",
+    "dev": "node server.js",
+    "dev:watch": "node --watch server.js",
     "test": "node --experimental-test-isolation=none --test tests/*.test.js",
     "blockchain:compile": "node scripts/compileScreeningRegistry.js",
     "blockchain:deploy": "node scripts/deployScreeningRegistry.js",

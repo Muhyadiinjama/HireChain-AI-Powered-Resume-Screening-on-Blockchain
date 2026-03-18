@@ -61,8 +61,15 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
-  --bg-main: #ffffff;
-  --text-main: #111827;
+  --bg-main: #f4f8fc;
+  --text-main: #0f172a;
+  --light-surface: #ecf3f9;
+  --light-card: #ffffff;
+  --light-border-soft: #dbe6f0;
+  --light-border-strong: #c9d8e6;
+  --light-text-muted: #64748b;
+  --light-text-body: #475569;
+  --light-text-strong: #334155;
 }
 
 .dark {
@@ -125,4 +132,48 @@ h1, h2, h3, h4, h5, h6, .font-tight {
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+html:not(.dark) .bg-gray-50 {
+  background-color: var(--light-surface);
+}
+
+html:not(.dark) .bg-white {
+  background-color: var(--light-card);
+}
+
+html:not(.dark) .border-gray-100 {
+  border-color: var(--light-border-soft);
+}
+
+html:not(.dark) .border-gray-200 {
+  border-color: var(--light-border-strong);
+}
+
+html:not(.dark) .text-gray-500 {
+  color: var(--light-text-muted);
+}
+
+html:not(.dark) .text-gray-600 {
+  color: var(--light-text-body);
+}
+
+html:not(.dark) .text-gray-700 {
+  color: var(--light-text-strong);
+}
+
+html:not(.dark) .placeholder\:text-gray-400::placeholder {
+  color: #94a3b8;
+}
+
+html:not(.dark) .hover\:bg-gray-50:hover {
+  background-color: var(--light-surface);
+}
+
+html:not(.dark) .hover\:bg-gray-100:hover {
+  background-color: #e4edf6;
+}
+
+html:not(.dark) .hover\:border-gray-200:hover {
+  border-color: var(--light-border-strong);
 }

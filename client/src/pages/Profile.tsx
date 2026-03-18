@@ -1,153 +1,103 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import { toast } from 'react-hot-toast';
-import { Building2, Mail, Save, ShieldCheck, UserRound } from 'lucide-react';
-import { updateProfile } from '../services/api';
+import { Link } from 'react-router-dom';
+import { Building2, Mail, PencilLine, ShieldCheck, UserRound } from 'lucide-react';
+import AccountShell from '../components/account/AccountShell';
 import { useAuth } from '../hooks/useAuth';
-import { formatErrorMessage } from '../utils/errorHandlers';
+import { getInitials, getProviderIds, getProviderSummary, loadStoredAvatar } from '../utils/accountHelpers';
 
 const Profile = () => {
-    const { user, refreshUser } = useAuth();
-    const [name, setName] = useState('');
-    const [company, setCompany] = useState('');
-    const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        if (!user) {
-            return;
-        }
-
-        setName(user.name || '');
-        setCompany(user.company || '');
-    }, [user]);
+    const { user, firebaseUser } = useAuth();
 
     if (!user) {
         return null;
     }
 
-    const needsCompany = user.role === 'recruiter' || user.role === 'admin';
-
-    const handleSubmit = async (event: FormEvent) => {
-        event.preventDefault();
-
-        if (needsCompany && !company.trim()) {
-            toast.error('Company name is required for recruiter and admin accounts.');
-            return;
-        }
-
-        setLoading(true);
-        try {
-            await updateProfile({
-                name: name.trim(),
-                company: company.trim()
-            });
-            await refreshUser();
-            toast.success('Profile updated successfully.');
-        } catch (error) {
-            toast.error(formatErrorMessage(error));
-        } finally {
-            setLoading(false);
-        }
-    };
+    const avatarPreview = loadStoredAvatar(user._id);
+    const initials = getInitials(user.name);
+    const providerSummary = getProviderSummary(getProviderIds(firebaseUser));
 
     return (
-        <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12">
-            <div className="rounded-[36px] bg-gradient-to-br from-brand-primary via-brand-primary to-brand-secondary text-white p-8 md:p-10 shadow-xl mb-8">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-black uppercase tracking-wide mb-4">
-                    <ShieldCheck size={13} />
-                    <span>Profile Settings</span>
-                </div>
-                <h1 className="text-3xl md:text-4xl font-black mb-2">Manage Your Profile</h1>
-                <p className="text-white/80 max-w-2xl">
-                    Keep your account details up to date. Recruiter and admin accounts must include a company name.
-                </p>
+        <AccountShell showHero={false}>
+            <div className="max-w-4xl mx-auto">
+                <section className="rounded-[24px] bg-white dark:bg-dark-surface border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden transition-colors duration-300">
+                    <div className="relative p-5 md:p-6 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-brand-primary/6 via-brand-secondary/6 to-brand-accent/6 dark:from-brand-primary/10 dark:via-brand-secondary/10 dark:to-brand-accent/10">
+                        <div>
+                            <p className="text-xs font-black uppercase tracking-[0.24em] text-brand-primary/70">Profile</p>
+                            <h2 className="mt-2 text-xl md:text-2xl font-black text-gray-900 dark:text-white transition-colors duration-300">
+                                Personal information
+                            </h2>
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">
+                                View your account details and open the edit page when you want to make changes.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="p-5 md:p-6 grid gap-5 lg:grid-cols-[220px,1fr]">
+                        <div className="rounded-[20px] bg-gradient-to-br from-brand-primary/8 via-brand-secondary/8 to-brand-accent/8 dark:from-brand-primary/12 dark:via-brand-secondary/12 dark:to-brand-accent/12 p-5 border border-brand-primary/10 dark:border-white/5 transition-colors duration-300">
+                            <div className="mx-auto h-24 w-24 rounded-[24px] overflow-hidden bg-white dark:bg-dark-card text-brand-primary flex items-center justify-center text-3xl font-black shadow-sm">
+                                {avatarPreview ? (
+                                    <img src={avatarPreview} alt={`${user.name} avatar`} className="h-full w-full object-cover" />
+                                ) : (
+                                    <span>{initials}</span>
+                                )}
+                            </div>
+
+                            <div className="mt-4 text-center">
+                                <h3 className="text-lg font-black text-gray-900 dark:text-white">{user.name}</h3>
+                                <p className="mt-1 text-sm font-semibold text-gray-500 dark:text-gray-400 capitalize">{user.role}</p>
+                            </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <div className="rounded-[20px] bg-gradient-to-br from-brand-primary/6 to-brand-primary/2 dark:from-brand-primary/10 dark:to-brand-primary/5 p-4 border border-brand-primary/10 dark:border-white/5 transition-colors duration-300">
+                                <div className="flex items-center gap-3 text-brand-primary">
+                                    <UserRound size={16} />
+                                    <p className="text-xs font-black uppercase tracking-[0.22em]">Full Name</p>
+                                </div>
+                                <p className="mt-3 text-lg font-black text-gray-900 dark:text-white">{user.name}</p>
+                            </div>
+
+                            <div className="rounded-[20px] bg-gradient-to-br from-brand-secondary/6 to-brand-secondary/2 dark:from-brand-secondary/10 dark:to-brand-secondary/5 p-4 border border-brand-secondary/10 dark:border-white/5 transition-colors duration-300">
+                                <div className="flex items-center gap-3 text-brand-primary">
+                                    <Mail size={16} />
+                                    <p className="text-xs font-black uppercase tracking-[0.22em]">Email Address</p>
+                                </div>
+                                <p className="mt-3 text-base font-black break-all text-gray-900 dark:text-white">{user.email}</p>
+                            </div>
+
+                            <div className="rounded-[20px] bg-gradient-to-br from-emerald-500/8 to-emerald-500/3 dark:from-emerald-500/12 dark:to-emerald-500/5 p-4 border border-emerald-500/10 dark:border-white/5 transition-colors duration-300">
+                                <div className="flex items-center gap-3 text-brand-primary">
+                                    <Building2 size={16} />
+                                    <p className="text-xs font-black uppercase tracking-[0.22em]">Company</p>
+                                </div>
+                                <p className="mt-3 text-base font-black text-gray-900 dark:text-white">
+                                    {user.company?.trim() ? user.company : 'No company added'}
+                                </p>
+                            </div>
+
+                            <div className="rounded-[20px] bg-gradient-to-br from-brand-accent/8 to-brand-accent/3 dark:from-brand-accent/12 dark:to-brand-accent/5 p-4 border border-brand-accent/10 dark:border-white/5 transition-colors duration-300">
+                                <div className="flex items-center gap-3 text-brand-primary">
+                                    <ShieldCheck size={16} />
+                                    <p className="text-xs font-black uppercase tracking-[0.22em]">Access</p>
+                                </div>
+                                <p className="mt-3 text-base font-black text-gray-900 dark:text-white">{providerSummary}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="px-5 md:px-6 pb-6">
+                        <div className="flex justify-start md:justify-end">
+                            <Link
+                                to="/profile/edit"
+                                className="inline-flex items-center justify-center gap-2 rounded-xl premium-gradient text-white px-4 py-2.5 text-sm font-bold hover:opacity-95 transition-all shadow-sm"
+                            >
+                                <PencilLine size={16} />
+                                <span>Edit Profile</span>
+                            </Link>
+                        </div>
+                    </div>
+                </section>
             </div>
-
-            <form onSubmit={handleSubmit} className="rounded-[36px] bg-white dark:bg-dark-main border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden transition-colors duration-300">
-                <div className="p-6 md:p-8 border-b border-gray-100 dark:border-gray-800">
-                    <h2 className="text-2xl font-black text-gray-900 dark:text-white">Account Information</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        Edit your name and organization details here.
-                    </p>
-                </div>
-
-                <div className="p-6 md:p-8 grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">Full Name</label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                                <UserRound size={18} />
-                            </div>
-                            <input
-                                type="text"
-                                required
-                                value={name}
-                                onChange={(event) => setName(event.target.value)}
-                                className="block w-full pl-11 pr-4 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-brand-primary transition-all text-gray-900 dark:text-white"
-                                placeholder="Your full name"
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">Email Address</label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                                <Mail size={18} />
-                            </div>
-                            <input
-                                type="email"
-                                value={user.email}
-                                readOnly
-                                className="block w-full pl-11 pr-4 py-4 bg-gray-100 dark:bg-gray-900/70 border-none rounded-2xl text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">Role</label>
-                        <div className="px-4 py-4 rounded-2xl bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 font-bold uppercase tracking-wide">
-                            {user.role}
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">
-                            Company Name{needsCompany ? ' *' : ''}
-                        </label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-                                <Building2 size={18} />
-                            </div>
-                            <input
-                                type="text"
-                                value={company}
-                                onChange={(event) => setCompany(event.target.value)}
-                                required={needsCompany}
-                                disabled={!needsCompany}
-                                className="block w-full pl-11 pr-4 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-brand-primary transition-all text-gray-900 dark:text-white disabled:cursor-not-allowed disabled:opacity-60"
-                                placeholder={needsCompany ? 'Your company or organization' : 'Company not required for this role'}
-                            />
-                        </div>
-                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            {needsCompany
-                                ? 'This field is required for recruiter and admin accounts.'
-                                : 'Candidate accounts do not require a company name.'}
-                        </p>
-                    </div>
-                </div>
-
-                <div className="px-6 md:px-8 pb-8 flex justify-end">
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl premium-gradient text-white font-bold shadow-lg hover:opacity-95 transition-all disabled:opacity-70"
-                    >
-                        {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Save size={18} />}
-                        <span>Save Profile</span>
-                    </button>
-                </div>
-            </form>
-        </div>
+        </AccountShell>
     );
 };
 

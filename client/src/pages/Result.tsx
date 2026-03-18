@@ -27,16 +27,20 @@ const Result = () => {
     }, [id]);
 
     if (loading) return (
-        <div className="min-h-screen flex flex-col items-center justify-center dark:bg-dark-main transition-colors duration-300">
-            <div className="w-20 h-20 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin mb-4" />
-            <p className="text-gray-500 dark:text-gray-400 font-bold text-xl animate-pulse transition-colors">Generating your AI Scorecard...</p>
+        <div className="min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-80px)] px-4 md:px-6 py-8 md:py-12 dark:bg-dark-main transition-colors duration-300">
+            <div className="max-w-5xl mx-auto flex flex-col items-center pt-8 md:pt-12">
+                <div className="w-20 h-20 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin mb-4" />
+                <p className="text-gray-500 dark:text-gray-400 font-bold text-xl animate-pulse transition-colors">Generating your AI Scorecard...</p>
+            </div>
         </div>
     );
 
     if (!data) return (
-        <div className="min-h-screen flex flex-col items-center justify-center dark:bg-dark-main transition-colors duration-300">
-            <h2 className="text-2xl font-bold mb-4 dark:text-white transition-colors">Result not found</h2>
-            <button onClick={() => navigate('/dashboard')} className="text-brand-primary dark:text-brand-primary font-bold transition-colors">Return to Dashboard</button>
+        <div className="min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-80px)] px-4 md:px-6 py-8 md:py-12 dark:bg-dark-main transition-colors duration-300">
+            <div className="max-w-5xl mx-auto flex flex-col items-center pt-8 md:pt-12">
+                <h2 className="text-2xl font-bold mb-4 dark:text-white transition-colors">Result not found</h2>
+                <button onClick={() => navigate('/dashboard')} className="text-brand-primary dark:text-brand-primary font-bold transition-colors">Return to Dashboard</button>
+            </div>
         </div>
     );
 

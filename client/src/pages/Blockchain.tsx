@@ -61,8 +61,8 @@ const Blockchain = () => {
 
     if (loading) {
         return (
-            <div className="min-h-[calc(100vh-80px)] bg-gray-50 dark:bg-dark-main transition-colors duration-300">
-                <div className="max-w-5xl mx-auto px-4 md:px-6 py-20 flex flex-col items-center justify-center">
+            <div className="min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-80px)] bg-gray-50 dark:bg-dark-main transition-colors duration-300">
+                <div className="max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-12 flex flex-col items-center pt-8 md:pt-12">
                     <div className="w-16 h-16 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin mb-5" />
                     <p className="text-gray-500 dark:text-gray-400 font-bold tracking-wide transition-colors duration-300">
                         Loading verification record...

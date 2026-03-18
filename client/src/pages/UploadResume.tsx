@@ -124,9 +124,11 @@ Portfolio: ${formData.portfolio}
     };
 
     if (jobLoading) return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8faff] dark:bg-dark-main transition-colors duration-300">
-            <div className="w-16 h-16 border-4 border-brand-primary border-t-transparent rounded-full animate-spin mb-4" />
-            <p className="text-gray-500 font-medium">Loading application...</p>
+        <div className="min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-80px)] bg-[#f8faff] dark:bg-dark-main px-4 md:px-6 py-8 md:py-12 transition-colors duration-300">
+            <div className="max-w-6xl mx-auto flex flex-col items-center pt-8 md:pt-12">
+                <div className="w-16 h-16 border-4 border-brand-primary border-t-transparent rounded-full animate-spin mb-4" />
+                <p className="text-gray-500 font-medium">Loading application...</p>
+            </div>
         </div>
     );
 
