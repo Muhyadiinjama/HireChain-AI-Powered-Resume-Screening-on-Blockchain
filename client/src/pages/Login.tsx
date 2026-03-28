@@ -1,8 +1,8 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, LogIn, Chrome, Eye, EyeOff } from 'lucide-react';
-import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { getRedirectResult, signInWithEmailAndPassword, signInWithRedirect } from 'firebase/auth';
 import { auth, googleProvider } from '../services/firebase';
 import { loginUser } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
@@ -11,6 +11,8 @@ import { formatErrorMessage } from '../utils/errorHandlers';
 import { useTheme } from '../hooks/useTheme';
 import blackLogo from '../assets/logos/black-logo.png';
 import whiteLogo from '../assets/logos/white-logo.png';
+
+const GOOGLE_REDIRECT_PENDING_KEY = 'hirechain.google.redirect.pending';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -21,6 +23,51 @@ const Login = () => {
     const navigate = useNavigate();
     const { refreshUser } = useAuth();
     const { theme } = useTheme();
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const completeGoogleRedirect = async () => {
+            const redirectPending = sessionStorage.getItem(GOOGLE_REDIRECT_PENDING_KEY);
+            if (!redirectPending) {
+                return;
+            }
+
+            setLoading(true);
+
+            try {
+                const result = await getRedirectResult(auth);
+
+                if (!result?.user) {
+                    return;
+                }
+
+                const token = await result.user.getIdToken();
+                await loginUser({ token });
+                await refreshUser();
+
+                if (isMounted) {
+                    toast.success('Logged in with Google!');
+                    navigate('/dashboard', { replace: true });
+                }
+            } catch (err: unknown) {
+                if (isMounted) {
+                    toast.error(formatErrorMessage(err));
+                }
+            } finally {
+                sessionStorage.removeItem(GOOGLE_REDIRECT_PENDING_KEY);
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        void completeGoogleRedirect();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [navigate, refreshUser]);
 
     const handleLogin = async (e: FormEvent) => {
         e.preventDefault();
@@ -46,17 +93,11 @@ const Login = () => {
         setLoading(true);
 
         try {
-            const result = await signInWithPopup(auth, googleProvider);
-            const token = await result.user.getIdToken();
-
-            await loginUser({ token });
-            await refreshUser();
-
-            toast.success('Logged in with Google!');
-            navigate('/dashboard');
+            sessionStorage.setItem(GOOGLE_REDIRECT_PENDING_KEY, 'true');
+            await signInWithRedirect(auth, googleProvider);
         } catch (err: unknown) {
+            sessionStorage.removeItem(GOOGLE_REDIRECT_PENDING_KEY);
             toast.error(formatErrorMessage(err));
-        } finally {
             setLoading(false);
         }
     };
@@ -166,24 +207,26 @@ const Login = () => {
                     <Register isEmbed={true} />
                 )}
 
-                <div className="mt-8 md:mt-10">
-                    <div className="relative flex items-center justify-center mb-6 md:mb-8">
-                        <div className="border-t border-gray-100 dark:border-gray-800 w-full transition-colors duration-300" />
-                        <span className="absolute bg-white dark:bg-dark-main px-4 text-xs font-semibold text-gray-400 uppercase tracking-widest transition-colors duration-300">
-                            Or login with
-                        </span>
-                    </div>
+                {!showRegister && (
+                    <div className="mt-8 md:mt-10">
+                        <div className="relative flex items-center justify-center mb-6 md:mb-8">
+                            <div className="border-t border-gray-100 dark:border-gray-800 w-full transition-colors duration-300" />
+                            <span className="absolute bg-white dark:bg-dark-main px-4 text-xs font-semibold text-gray-400 uppercase tracking-widest transition-colors duration-300">
+                                Or login with
+                            </span>
+                        </div>
 
-                    <button
-                        type="button"
-                        onClick={handleGoogleLogin}
-                        disabled={loading}
-                        className="w-full flex items-center justify-center space-x-3 py-3.5 bg-white dark:bg-dark-surface rounded-xl md:rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors border-2 border-gray-100 dark:border-gray-800 font-semibold text-gray-700 dark:text-gray-300 active:scale-95"
-                    >
-                        <Chrome size={22} className="text-red-500" />
-                        <span>Continue with Google</span>
-                    </button>
-                </div>
+                        <button
+                            type="button"
+                            onClick={handleGoogleLogin}
+                            disabled={loading}
+                            className="w-full flex items-center justify-center space-x-3 py-3.5 bg-white dark:bg-dark-surface rounded-xl md:rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors border-2 border-gray-100 dark:border-gray-800 font-semibold text-gray-700 dark:text-gray-300 active:scale-95"
+                        >
+                            <Chrome size={22} className="text-red-500" />
+                            <span>Continue with Google</span>
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
