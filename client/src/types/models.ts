@@ -24,6 +24,7 @@ export interface Job {
     department?: string;
     experienceLevel?: string;
     category?: string;
+    subcategory?: string;
     status?: JobStatus;
     createdBy?: string | DBUser;
     applicationLink?: string;
@@ -40,6 +41,7 @@ export interface JobMutationPayload {
     requirements?: string;
     experienceLevel?: string;
     category?: string;
+    subcategory?: string;
     tags?: string[];
     status?: JobStatus;
 }

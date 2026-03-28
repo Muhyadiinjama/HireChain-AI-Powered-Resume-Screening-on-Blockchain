@@ -6,12 +6,13 @@ import {
     Clock, Upload, Eye, Sparkles, Shield, ChevronRight,
     Building2, X
 } from 'lucide-react';
+import { JOB_CATEGORY_LABELS } from '../constants/jobCategories';
 import { getJobs } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import type { Job } from '../types/models';
 
 const JOB_TYPES = ['All', 'Full-time', 'Part-time', 'Remote', 'Contract', 'Internship'];
-const CATEGORIES = ['All', 'Engineering', 'Design', 'Marketing', 'Sales', 'Product', 'Finance', 'HR'];
+const CATEGORIES = ['All', ...JOB_CATEGORY_LABELS];
 
 const Jobs = () => {
     const [jobs, setJobs] = useState<Job[]>([]);
@@ -62,9 +63,11 @@ const Jobs = () => {
         const matchSearch =
             job.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             job.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            job.location?.toLowerCase().includes(searchQuery.toLowerCase());
+            job.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            job.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            job.subcategory?.toLowerCase().includes(searchQuery.toLowerCase());
         const matchType = selectedType === 'All' || job.type === selectedType;
-        const matchCategory = selectedCategory === 'All' || job.department === selectedCategory;
+        const matchCategory = selectedCategory === 'All' || job.category === selectedCategory;
         return matchSearch && matchType && matchCategory;
     });
 
@@ -160,7 +163,7 @@ const Jobs = () => {
                                 </div>
                             </div>
                             <div>
-                                <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Department</p>
+                                <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Category</p>
                                 <div className="flex flex-wrap gap-2">
                                     {CATEGORIES.map((cat) => (
                                         <button
@@ -189,10 +192,7 @@ const Jobs = () => {
                 )}
 
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center py-20 md:py-32 text-gray-400">
-                        <div className="w-12 h-12 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin mb-4" />
-                        <p className="font-medium">Loading opportunities...</p>
-                    </div>
+                    <div className="py-20 md:py-32" />
                 ) : filteredJobs.length === 0 ? (
                     <div className="text-center py-20 md:py-32">
                         <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-3xl bg-gray-100 dark:bg-dark-surface flex items-center justify-center mx-auto mb-5 md:mb-6">
@@ -271,8 +271,23 @@ const Jobs = () => {
 
                                             {job.description && (
                                                 <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base leading-relaxed line-clamp-2 mb-4">
-                                                    {job.description}
-                                                </p>
+                                            {job.description}
+                                        </p>
+                                            )}
+
+                                            {(job.category || job.subcategory) && (
+                                                <div className="flex flex-wrap gap-2 mb-4">
+                                                    {job.category && (
+                                                        <span className="bg-brand-primary/10 dark:bg-brand-primary/20 text-brand-primary dark:text-brand-primary px-3 py-1 rounded-xl text-xs font-bold border border-brand-primary/20 dark:border-brand-primary/30">
+                                                            {job.category}
+                                                        </span>
+                                                    )}
+                                                    {job.subcategory && (
+                                                        <span className="bg-brand-secondary/10 dark:bg-brand-secondary/20 text-brand-secondary dark:text-brand-secondary px-3 py-1 rounded-xl text-xs font-bold border border-brand-secondary/20 dark:border-brand-secondary/30">
+                                                            {job.subcategory}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             )}
 
                                             {job.tags && job.tags.length > 0 && (

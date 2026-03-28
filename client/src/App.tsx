@@ -6,6 +6,8 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import CreateJob from './pages/CreateJob';
 import EditJob from './pages/EditJob';
+import JobApplicantsPage from './pages/JobApplicantsPage';
+import CandidateReviewPage from './pages/CandidateReviewPage';
 import UploadResume from './pages/UploadResume';
 import Result from './pages/Result';
 import Blockchain from './pages/Blockchain';
@@ -67,6 +69,8 @@ function App() {
                 <Route element={<ProtectedRoute allowedRoles={['recruiter', 'admin']} />}>
                   <Route path="/create-job" element={<CreateJob />} />
                   <Route path="/edit-job/:id" element={<EditJob />} />
+                  <Route path="/jobs/:id/applicants" element={<JobApplicantsPage />} />
+                  <Route path="/applications/:id/review" element={<CandidateReviewPage />} />
                 </Route>
 
                 <Route element={<ProtectedRoute allowedRoles={['candidate']} />}>

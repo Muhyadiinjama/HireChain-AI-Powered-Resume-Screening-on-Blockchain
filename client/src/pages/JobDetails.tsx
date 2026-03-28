@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getJobById } from '../services/api';
 import { 
     Briefcase, MapPin, DollarSign, Building2, 
-    ChevronLeft, Share2, BookmarkPlus, CheckCircle2,
+    Share2, BookmarkPlus, CheckCircle2,
     Calendar, Users, ArrowRight, Code, Shield
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
@@ -30,17 +30,11 @@ const JobDetails = () => {
         fetchJob();
     }, [id]);
 
-    if (loading) return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8faff] dark:bg-dark-main transition-colors duration-300">
-            <div className="w-16 h-16 border-4 border-brand-primary border-t-transparent rounded-full animate-spin mb-4" />
-            <p className="text-gray-500 dark:text-gray-400 font-medium">Loading details...</p>
-        </div>
-    );
+    if (loading) return <div className="min-h-screen bg-[#f8faff] dark:bg-dark-main transition-colors duration-300" />;
 
     if (!job) return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8faff] dark:bg-dark-main transition-colors duration-300">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Job not found</h2>
-            <button onClick={() => navigate('/dashboard')} className="text-brand-primary dark:text-brand-primary hover:underline font-bold">Return to Dashboard</button>
         </div>
     );
 
@@ -48,10 +42,7 @@ const JobDetails = () => {
         <div className="min-h-screen bg-[#f8faff] dark:bg-dark-main font-sans pb-20 transition-colors duration-300">
             {/* Header */}
             <div className="bg-white dark:bg-dark-surface border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-4 md:px-8 py-4 sticky top-0 z-10 transition-colors duration-300">
-                <button onClick={() => navigate(-1)} className="flex items-center space-x-2 text-xs md:text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-                    <ChevronLeft size={16} />
-                    <span>Back to Jobs</span>
-                </button>
+                <div />
                 <div className="flex space-x-2 md:space-x-3">
                     <button className="p-2 text-gray-400 dark:text-gray-500 hover:text-brand-primary dark:hover:text-brand-primary hover:bg-brand-primary/10 dark:hover:bg-brand-primary/20 rounded-xl transition-all"><Share2 size={18} className="md:w-5 md:h-5" /></button>
                     <button className="p-2 text-gray-400 dark:text-gray-500 hover:text-brand-primary dark:hover:text-brand-primary hover:bg-brand-primary/10 dark:hover:bg-brand-primary/20 rounded-xl transition-all"><BookmarkPlus size={18} className="md:w-5 md:h-5" /></button>
@@ -77,6 +68,20 @@ const JobDetails = () => {
                                         <div className="flex items-center"><Briefcase size={16} className="mr-2 text-gray-400 dark:text-gray-500" />{job.type}</div>
                                         <div className="flex items-center"><DollarSign size={16} className="mr-0.5 text-gray-400 dark:text-gray-500" />{job.salaryRange}</div>
                                     </div>
+                                    {(job.category || job.subcategory) && (
+                                        <div className="mt-5 flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                                            {job.category && (
+                                                <span className="rounded-xl border border-brand-primary/20 bg-brand-primary/10 px-3 py-1.5 text-xs font-black text-brand-primary dark:border-brand-primary/30 dark:bg-brand-primary/20">
+                                                    {job.category}
+                                                </span>
+                                            )}
+                                            {job.subcategory && (
+                                                <span className="rounded-xl border border-brand-secondary/20 bg-brand-secondary/10 px-3 py-1.5 text-xs font-black text-brand-secondary dark:border-brand-secondary/30 dark:bg-brand-secondary/20">
+                                                    {job.subcategory}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             {user?.role === 'candidate' && (
@@ -144,7 +149,23 @@ const JobDetails = () => {
                                 <div className="bg-brand-accent/10 dark:bg-brand-accent/20 p-3 rounded-xl text-brand-accent dark:text-brand-accent shrink-0 transition-colors"><CheckCircle2 size={20} /></div>
                                 <div>
                                     <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1 transition-colors">Department</p>
-                                    <p className="font-bold text-gray-800 dark:text-gray-200 transition-colors">Engineering</p>
+                                    <p className="font-bold text-gray-800 dark:text-gray-200 transition-colors">{job.department || 'Not specified'}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-start space-x-4">
+                                <div className="bg-brand-primary/10 dark:bg-brand-primary/20 p-3 rounded-xl text-brand-primary dark:text-brand-primary shrink-0 transition-colors"><Briefcase size={20} /></div>
+                                <div>
+                                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1 transition-colors">Category</p>
+                                    <p className="font-bold text-gray-800 dark:text-gray-200 transition-colors">{job.category || 'Not specified'}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-start space-x-4">
+                                <div className="bg-brand-secondary/10 dark:bg-brand-secondary/20 p-3 rounded-xl text-brand-secondary dark:text-brand-secondary shrink-0 transition-colors"><Code size={20} /></div>
+                                <div>
+                                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1 transition-colors">Subcategory</p>
+                                    <p className="font-bold text-gray-800 dark:text-gray-200 transition-colors">{job.subcategory || 'Not specified'}</p>
                                 </div>
                             </div>
                         </div>

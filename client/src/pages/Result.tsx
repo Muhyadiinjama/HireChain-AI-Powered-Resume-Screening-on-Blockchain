@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Shield, CheckCircle2, XCircle, ChevronRight, Award, Zap, Briefcase } from 'lucide-react';
+import { Shield, CheckCircle2, XCircle, ChevronRight, Award, Zap } from 'lucide-react';
 import { getApplicationResult } from '../services/api';
 import FairnessPrivacyPanel from '../components/FairnessPrivacyPanel';
 import type { ApplicationResultData } from '../types/models';
@@ -26,20 +26,12 @@ const Result = () => {
         fetchResult();
     }, [id]);
 
-    if (loading) return (
-        <div className="min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-80px)] px-4 md:px-6 py-8 md:py-12 dark:bg-dark-main transition-colors duration-300">
-            <div className="max-w-5xl mx-auto flex flex-col items-center pt-8 md:pt-12">
-                <div className="w-20 h-20 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin mb-4" />
-                <p className="text-gray-500 dark:text-gray-400 font-bold text-xl animate-pulse transition-colors">Generating your AI Scorecard...</p>
-            </div>
-        </div>
-    );
+    if (loading) return <div className="min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-80px)] dark:bg-dark-main transition-colors duration-300" />;
 
     if (!data) return (
         <div className="min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-80px)] px-4 md:px-6 py-8 md:py-12 dark:bg-dark-main transition-colors duration-300">
             <div className="max-w-5xl mx-auto flex flex-col items-center pt-8 md:pt-12">
                 <h2 className="text-2xl font-bold mb-4 dark:text-white transition-colors">Result not found</h2>
-                <button onClick={() => navigate('/dashboard')} className="text-brand-primary dark:text-brand-primary font-bold transition-colors">Return to Dashboard</button>
             </div>
         </div>
     );
@@ -192,21 +184,6 @@ const Result = () => {
 
             <div className="mt-12 text-center">
                 <p className="text-xs md:text-gray-400 mb-6 font-medium transition-colors">Verified by decentralized HireChain ledger.</p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:space-x-6">
-                    <button
-                        onClick={() => navigate('/dashboard')}
-                        className="w-full sm:w-auto bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white px-8 py-3 rounded-2xl font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all flex items-center justify-center space-x-2"
-                    >
-                        <Briefcase size={20} />
-                        <span>Return to Dashboard</span>
-                    </button>
-                    <button
-                        onClick={() => navigate('/')}
-                        className="text-brand-primary dark:text-brand-primary font-bold hover:underline transition-colors"
-                    >
-                        Back to Home
-                    </button>
-                </div>
             </div>
         </div>
     );

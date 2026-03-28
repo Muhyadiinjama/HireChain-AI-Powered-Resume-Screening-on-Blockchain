@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import {
-    Plus, Users, Briefcase, ChevronRight, Search, Filter,
+    Plus, Users, Briefcase, ChevronDown, ChevronRight, Search, Filter,
     FileText, TrendingUp, Eye,
     CheckCircle, MapPin, Edit2, Trash2,
     Shield, Clock, Download, Database,
@@ -11,24 +11,17 @@ import {
 import {
     deleteJob,
     getAllCandidates,
-    getCandidateResume,
-    getCandidateReview,
     getJobs,
     getMyApplications,
-    updateCandidateDecision,
     updateJob
 } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import blackLogo from '../assets/logos/black-logo.png';
 import whiteLogo from '../assets/logos/white-logo.png';
-import JobApplicantsDrawer from '../components/JobApplicantsDrawer';
-import CandidateReviewDrawer from '../components/CandidateReviewDrawer';
 import type {
     ApplicationRecord,
     ApplicationStatus,
-    CandidateRecord,
-    CandidateReviewData,
     Job,
     JobStatus,
     ScreeningRecord
@@ -72,14 +65,6 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const { theme } = useTheme();
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
-    const [candidateReview, setCandidateReview] = useState<CandidateReviewData | null>(null);
-    const [candidateReviewLoading, setCandidateReviewLoading] = useState(false);
-    const [decisionLoading, setDecisionLoading] = useState(false);
-    const [decisionNotes, setDecisionNotes] = useState('');
-    const [resumePreviewUrl, setResumePreviewUrl] = useState<string | null>(null);
-    const [resumeLoading, setResumeLoading] = useState(false);
-    const [selectedJobPreview, setSelectedJobPreview] = useState<Job | null>(null);
 
     useEffect(() => {
         if (user?.role === 'recruiter' || user?.role === 'admin') {
@@ -130,14 +115,6 @@ const Dashboard = () => {
     useEffect(() => {
         void fetchData();
     }, [fetchData]);
-
-    useEffect(() => {
-        return () => {
-            if (resumePreviewUrl) {
-                URL.revokeObjectURL(resumePreviewUrl);
-            }
-        };
-    }, [resumePreviewUrl]);
 
     const downloadBlobFile = (content: BlobPart, fileName: string, type: string) => {
         const blob = new Blob([content], { type });
@@ -275,156 +252,12 @@ const Dashboard = () => {
         }
     };
 
-    const closeCandidateReview = useCallback(() => {
-        setSelectedCandidateId(null);
-        setCandidateReview(null);
-        setCandidateReviewLoading(false);
-        setDecisionLoading(false);
-        setDecisionNotes('');
-        if (resumePreviewUrl) {
-            URL.revokeObjectURL(resumePreviewUrl);
-        }
-        setResumePreviewUrl(null);
-        setResumeLoading(false);
-    }, [resumePreviewUrl]);
-
-    const closeJobApplicantsPreview = useCallback(() => {
-        setSelectedJobPreview(null);
-    }, []);
-
-    const applyCandidateUpdateToList = useCallback((updatedCandidate: CandidateRecord) => {
-        setRecruiterCandidates((currentCandidates) =>
-            currentCandidates.map((candidate) => {
-                if (candidate.candidateId?._id !== updatedCandidate._id) {
-                    return candidate;
-                }
-
-                return {
-                    ...candidate,
-                    candidateId: {
-                        ...candidate.candidateId,
-                        ...updatedCandidate
-                    }
-                };
-            })
-        );
-    }, []);
-
-    const loadResumePreview = useCallback(async (
-        candidateId: string,
-        options?: { download?: boolean; fileName?: string; mimeType?: string }
-    ) => {
-        const { download = false, fileName, mimeType } = options || {};
-
-        setResumeLoading(true);
-        try {
-            const response = await getCandidateResume(candidateId);
-            const blobType = response.data.type || mimeType || 'application/octet-stream';
-            const blob = new Blob([response.data], { type: blobType });
-            const objectUrl = URL.createObjectURL(blob);
-
-            if (download) {
-                const link = document.createElement('a');
-                link.href = objectUrl;
-                link.download = fileName || 'resume';
-                link.target = '_blank';
-                link.rel = 'noopener';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
-                return;
-            }
-
-            setResumePreviewUrl((currentUrl) => {
-                if (currentUrl) {
-                    URL.revokeObjectURL(currentUrl);
-                }
-                return objectUrl;
-            });
-        } catch (error) {
-            console.error('Failed to load candidate resume:', error);
-            toast.error('Unable to open the uploaded resume.');
-        } finally {
-            setResumeLoading(false);
-        }
-    }, []);
-
-    const handleOpenCandidateReview = useCallback(async (candidateId: string) => {
-        setSelectedCandidateId(candidateId);
-        setCandidateReviewLoading(true);
-        setCandidateReview(null);
-        setDecisionNotes('');
-        setResumeLoading(false);
-        setResumePreviewUrl((currentUrl) => {
-            if (currentUrl) {
-                URL.revokeObjectURL(currentUrl);
-            }
-            return null;
-        });
-
-        try {
-            const response = await getCandidateReview(candidateId);
-            const reviewData = response.data as CandidateReviewData;
-            setCandidateReview(reviewData);
-            setDecisionNotes(reviewData.candidate?.decisionNotes || '');
-
-            if (reviewData.candidate?.resumeMimeType?.toLowerCase().includes('pdf')) {
-                void loadResumePreview(candidateId, {
-                    fileName: reviewData.candidate.resumeOriginalName,
-                    mimeType: reviewData.candidate.resumeMimeType
-                });
-            }
-        } catch (error) {
-            console.error('Failed to load candidate review:', error);
-            toast.error('Unable to load the applicant review.');
-            closeCandidateReview();
-        } finally {
-            setCandidateReviewLoading(false);
-        }
-    }, [closeCandidateReview, loadResumePreview]);
-
     const getApplicantsForJob = useCallback((jobId: string) => {
         return recruiterCandidates.filter((candidate) => {
             const linkedJobId = candidate.candidateId?.jobId?._id || candidate.candidateId?.jobId;
             return linkedJobId === jobId;
         });
     }, [recruiterCandidates]);
-
-    const handleOpenJobApplicantsPreview = useCallback((job: Job) => {
-        setSelectedJobPreview(job);
-    }, []);
-
-    const handleOpenApplicantFromJobPreview = useCallback(async (candidateId: string) => {
-        closeJobApplicantsPreview();
-        await handleOpenCandidateReview(candidateId);
-    }, [closeJobApplicantsPreview, handleOpenCandidateReview]);
-
-    const handleCandidateDecision = useCallback(async (status: ApplicationStatus) => {
-        if (!selectedCandidateId) {
-            return;
-        }
-
-        setDecisionLoading(true);
-        try {
-            const response = await updateCandidateDecision(selectedCandidateId, {
-                status,
-                decisionNotes
-            });
-            const reviewData = response.data as CandidateReviewData;
-            setCandidateReview(reviewData);
-            setDecisionNotes(reviewData.candidate?.decisionNotes || '');
-            if (reviewData.candidate) {
-                applyCandidateUpdateToList(reviewData.candidate);
-            }
-            toast.success(reviewData.message || `Candidate marked as ${status}.`);
-        } catch (error) {
-            console.error('Failed to update candidate decision:', error);
-            toast.error('Unable to update the applicant status.');
-        } finally {
-            setDecisionLoading(false);
-        }
-    }, [applyCandidateUpdateToList, decisionNotes, selectedCandidateId]);
 
     if (!user) return null;
 
@@ -1120,7 +953,7 @@ const Dashboard = () => {
                                                 <td className="px-8 py-6 text-center">
                                                     <button
                                                         type="button"
-                                                        onClick={() => handleOpenJobApplicantsPreview(job)}
+                                                        onClick={() => navigate(`/jobs/${job._id}/applicants`)}
                                                         className="inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2 bg-gray-50 dark:bg-dark-surface border border-gray-100 dark:border-gray-800 text-gray-600 dark:text-gray-300 font-bold hover:text-brand-primary hover:border-brand-primary/20 transition-all"
                                                     >
                                                         <Users size={14} className="text-gray-300 dark:text-gray-500" />
@@ -1133,24 +966,26 @@ const Dashboard = () => {
                                                 <td className="px-8 py-6">
                                                     <button
                                                         onClick={() => handleStatusToggle(job._id, job.status || 'Active')}
-                                                        className={`px-4 py-2 rounded-xl text-[12px] font-bold flex items-center space-x-2 transition-all border ${
+                                                        className={`inline-flex min-w-[124px] items-center justify-between gap-3 px-4 py-2 rounded-xl text-[12px] font-bold transition-all border ${
                                                             job.status === 'Closed' 
                                                             ? 'bg-gray-100 dark:bg-dark-surface text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-dark-card' 
                                                             : 'bg-brand-accent/10 dark:bg-brand-accent/20 text-brand-accent dark:text-brand-accent border-brand-accent/20 dark:border-brand-accent/30 hover:bg-brand-accent/20 dark:hover:bg-brand-accent/30'
                                                         }`}
                                                     >
-                                                        <div className={`w-1.5 h-1.5 rounded-full ${job.status === 'Closed' ? 'bg-gray-400 dark:bg-gray-500' : 'bg-brand-accent dark:bg-brand-accent'}`} />
-                                                        <span>{job.status || 'Active'}</span>
-                                                        <ChevronRight size={14} className="rotate-90 text-gray-400 dark:text-gray-500" />
+                                                        <span className="inline-flex items-center gap-2">
+                                                            <span className={`w-1.5 h-1.5 rounded-full ${job.status === 'Closed' ? 'bg-gray-400 dark:bg-gray-500' : 'bg-brand-accent dark:bg-brand-accent'}`} />
+                                                            <span>{job.status || 'Active'}</span>
+                                                        </span>
+                                                        <ChevronDown size={14} className="shrink-0 text-gray-400 dark:text-gray-500" />
                                                     </button>
                                                 </td>
                                                 <td className="px-8 py-6 text-right">
                                                     <div className="flex items-center justify-end space-x-1">
                                                         <button
                                                             type="button"
-                                                            onClick={() => handleOpenJobApplicantsPreview(job)}
+                                                            onClick={() => navigate(`/jobs/${job._id}/applicants`)}
                                                             className="p-2.5 text-gray-400 dark:text-gray-500 hover:text-brand-secondary dark:hover:text-brand-secondary hover:bg-brand-secondary/10 rounded-xl transition-all active:scale-90"
-                                                            title="Preview applicants"
+                                                            title="Open applicants page"
                                                         >
                                                             <Eye size={18} />
                                                         </button>
@@ -1340,7 +1175,7 @@ const Dashboard = () => {
                                                         <button
                                                             type="button"
                                                             disabled={!candidateId}
-                                                            onClick={() => candidateId && void handleOpenCandidateReview(candidateId)}
+                                                            onClick={() => candidateId && navigate(`/applications/${candidateId}/review`)}
                                                             className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-brand-primary hover:bg-brand-primary/10 rounded-2xl transition-all disabled:opacity-40"
                                                         >
                                                             <Eye size={18} />
@@ -1443,11 +1278,11 @@ const Dashboard = () => {
                                             </div>
                                             
                                             {/* Right: Actions */}
-                                            <div className="flex flex-col items-stretch md:items-end shrink-0 min-w-[160px] md:mt-0 mt-4">
+                                            <div className="flex w-full md:w-[190px] flex-col items-center shrink-0 md:mt-0 mt-4">
                                                 <button onClick={() => navigate(`/upload/${job._id}`)} className="w-full py-2.5 bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent text-white rounded-lg md:rounded-xl text-sm font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center space-x-2">
                                                     <Upload size={16} /><span>Apply Now</span>
                                                 </button>
-                                                <button onClick={() => navigate(`/job/${job._id}`)} className="flex items-center justify-center md:justify-end w-full space-x-2 text-gray-700 dark:text-gray-300 font-bold text-sm hover:text-gray-900 dark:hover:text-white transition-colors mt-3 md:mt-4 pr-0 md:pr-1">
+                                                <button onClick={() => navigate(`/job/${job._id}`)} className="mt-3 flex w-full items-center justify-center space-x-2 text-gray-700 dark:text-gray-300 font-bold text-sm hover:text-gray-900 dark:hover:text-white transition-colors">
                                                     <Eye size={16} className="text-gray-500 dark:text-gray-400" />
                                                     <span>View Details</span>
                                                 </button>
@@ -1542,44 +1377,6 @@ const Dashboard = () => {
                 )}
             </div>
 
-            <JobApplicantsDrawer
-                open={Boolean(selectedJobPreview)}
-                job={selectedJobPreview}
-                candidates={selectedJobPreview ? getApplicantsForJob(selectedJobPreview._id) : []}
-                onClose={closeJobApplicantsPreview}
-                onOpenApplicant={(candidateId) => {
-                    void handleOpenApplicantFromJobPreview(candidateId);
-                }}
-            />
-
-            <CandidateReviewDrawer
-                open={Boolean(selectedCandidateId)}
-                loading={candidateReviewLoading}
-                decisionLoading={decisionLoading}
-                resumeLoading={resumeLoading}
-                resumePreviewUrl={resumePreviewUrl}
-                decisionNotes={decisionNotes}
-                data={candidateReview}
-                onClose={closeCandidateReview}
-                onDecisionNotesChange={setDecisionNotes}
-                onChangeStatus={(status) => void handleCandidateDecision(status)}
-                onDownloadResume={() => {
-                    if (!selectedCandidateId) {
-                        return;
-                    }
-
-                    void loadResumePreview(selectedCandidateId, {
-                        download: true,
-                        fileName: candidateReview?.candidate?.resumeOriginalName,
-                        mimeType: candidateReview?.candidate?.resumeMimeType
-                    });
-                }}
-                onViewResult={() => {
-                    if (selectedCandidateId) {
-                        navigate(`/result/${selectedCandidateId}`);
-                    }
-                }}
-            />
         </div>
     );
 };

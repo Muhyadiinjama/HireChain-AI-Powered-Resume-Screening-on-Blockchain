@@ -31,6 +31,7 @@ type CandidateReviewDrawerProps = {
     onChangeStatus: (status: ApplicationStatus) => void;
     onDownloadResume: () => void;
     onViewResult: () => void;
+    mode?: 'modal' | 'page';
 };
 
 const CandidateReviewDrawer = ({
@@ -45,12 +46,14 @@ const CandidateReviewDrawer = ({
     onDecisionNotesChange,
     onChangeStatus,
     onDownloadResume,
-    onViewResult
+    onViewResult,
+    mode = 'modal'
 }: CandidateReviewDrawerProps) => {
-    if (!open) {
+    if (mode === 'modal' && !open) {
         return null;
     }
 
+    const isPage = mode === 'page';
     const candidate = data?.candidate;
     const screening = data?.screening;
     const blockchain = data?.blockchain;
@@ -74,16 +77,11 @@ const CandidateReviewDrawer = ({
     const redactedFields = screening?.redactedFields || [];
     const statusMeta = getApplicationStatusMeta(currentStatus);
 
-    return (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-0 md:p-4">
-            <button
-                type="button"
-                className="absolute inset-0 bg-slate-900/45 backdrop-blur-[2px]"
-                onClick={onClose}
-                aria-label="Close candidate review"
-            />
-
-            <aside className="relative w-full max-w-6xl h-[100dvh] md:h-auto md:max-h-[calc(100dvh-2rem)] bg-white dark:bg-dark-main md:border border-gray-100 dark:border-gray-800 shadow-2xl overflow-y-auto transition-colors duration-300 rounded-none md:rounded-[32px]">
+    const reviewCard = (
+            <aside className={isPage
+                ? 'w-full bg-white dark:bg-dark-main border border-gray-100 dark:border-gray-800 shadow-xl overflow-y-auto transition-colors duration-300 rounded-[32px]'
+                : 'relative w-full max-w-6xl h-[100dvh] md:h-auto md:max-h-[calc(100dvh-2rem)] bg-white dark:bg-dark-main md:border border-gray-100 dark:border-gray-800 shadow-2xl overflow-y-auto transition-colors duration-300 rounded-none md:rounded-[32px]'
+            }>
                 <div className="sticky top-0 z-10 bg-white/95 dark:bg-dark-main/95 backdrop-blur border-b border-gray-100 dark:border-gray-800 px-6 md:px-8 py-5 transition-colors duration-300">
                     <div className="flex items-start justify-between gap-4">
                         <div>
@@ -98,23 +96,20 @@ const CandidateReviewDrawer = ({
                                 {jobTitle} at {company}
                             </p>
                         </div>
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="p-3 rounded-2xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-dark-surface dark:hover:text-gray-200 transition-all"
-                        >
-                            <X size={18} />
-                        </button>
+                        {!isPage && (
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="p-3 rounded-2xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-dark-surface dark:hover:text-gray-200 transition-all"
+                            >
+                                <X size={18} />
+                            </button>
+                        )}
                     </div>
                 </div>
 
                 {loading ? (
-                    <div className="px-8 py-20 flex flex-col items-center justify-center">
-                        <div className="w-14 h-14 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin mb-5" />
-                        <p className="text-gray-500 dark:text-gray-400 font-bold transition-colors duration-300">
-                            Loading applicant review...
-                        </p>
-                    </div>
+                    <div className="px-8 py-12" />
                 ) : !candidate ? (
                     <div className="px-8 py-20 text-center">
                         <p className="text-gray-500 dark:text-gray-400 transition-colors duration-300">
@@ -455,9 +450,7 @@ const CandidateReviewDrawer = ({
                                     </div>
 
                                     {resumeLoading ? (
-                                        <div className="h-[520px] rounded-[24px] border border-dashed border-gray-200 dark:border-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 transition-colors duration-300">
-                                            Loading resume preview...
-                                        </div>
+                                        <div className="h-[520px] rounded-[24px] border border-dashed border-gray-200 dark:border-gray-800 transition-colors duration-300" />
                                     ) : canPreviewPdf ? (
                                         <iframe
                                             src={resumePreviewUrl || ''}
@@ -562,6 +555,27 @@ const CandidateReviewDrawer = ({
                     </div>
                 )}
             </aside>
+    );
+
+    if (isPage) {
+        return (
+            <div className="min-h-screen bg-gray-50 dark:bg-dark-main transition-colors duration-300">
+                <div className="mx-auto w-full max-w-7xl px-4 py-8 md:px-8 md:py-12">
+                    {reviewCard}
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-0 md:p-4">
+            <button
+                type="button"
+                className="absolute inset-0 bg-slate-900/45 backdrop-blur-[2px]"
+                onClick={onClose}
+                aria-label="Close candidate review"
+            />
+            {reviewCard}
         </div>
     );
 };

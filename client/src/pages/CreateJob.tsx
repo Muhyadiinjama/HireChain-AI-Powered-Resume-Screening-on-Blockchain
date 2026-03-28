@@ -3,9 +3,10 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import {
     Briefcase, FileText, MapPin, DollarSign, AlignLeft,
-    CheckCircle, X, ChevronDown, Check,
+    CheckCircle, ChevronDown, Check,
     Zap
 } from 'lucide-react';
+import { JOB_CATEGORY_LABELS, getSubcategoriesForCategory } from '../constants/jobCategories';
 import { createJob } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import type { JobMutationPayload } from '../types/models';
@@ -21,14 +22,24 @@ const CreateJob = () => {
         description: '',
         requirements: '',
         experienceLevel: 'Mid Level (2-5 years)',
-        category: 'Engineering'
+        category: '',
+        subcategory: ''
     });
 
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const availableSubcategories = getSubcategoriesForCategory(formData.category);
+    const fieldClassName = 'w-full px-5 py-3.5 bg-gray-50 dark:bg-dark-main border border-gray-200 dark:border-gray-800 rounded-2xl focus:bg-white dark:focus:bg-dark-surface focus:border-brand-primary focus:ring-2 focus:ring-brand-primary transition-all font-medium text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400';
+    const textAreaClassName = 'w-full px-5 py-4 bg-gray-50 dark:bg-dark-main border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white rounded-2xl focus:bg-white dark:focus:bg-dark-surface focus:border-brand-primary focus:ring-2 focus:ring-brand-primary transition-all text-sm leading-relaxed placeholder:text-gray-500 dark:placeholder:text-gray-400';
+    const selectClassName = 'w-full px-5 py-3.5 bg-gray-50 dark:bg-dark-main border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white rounded-2xl focus:bg-white dark:focus:bg-dark-surface focus:border-brand-primary focus:ring-2 focus:ring-brand-primary transition-all font-medium appearance-none';
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setFormData((current) => ({
+            ...current,
+            [name]: value,
+            ...(name === 'category' ? { subcategory: '' } : {})
+        }));
     };
 
     const handleSubmit = async (e: FormEvent) => {
@@ -53,17 +64,12 @@ const CreateJob = () => {
     };
 
     return (
-        <div className="fixed inset-0 bg-gray-900/40 dark:bg-dark-main/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto transition-colors duration-300">
-            <div className="bg-white dark:bg-dark-surface rounded-[32px] shadow-2xl w-full max-w-2xl relative my-auto border border-transparent dark:border-gray-800 transition-colors duration-300">
-                {/* Close Button */}
-                <button
-                    onClick={() => navigate('/dashboard')}
-                    className="absolute right-6 top-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+        <div className="min-h-screen bg-gray-50 dark:bg-dark-main transition-colors duration-300">
+            <div className="mx-auto w-full max-w-5xl px-4 py-8 md:px-8 md:py-12">
+                <form
+                    onSubmit={handleSubmit}
+                    className="mx-auto w-full max-w-3xl rounded-[32px] border border-gray-200/70 bg-white p-6 shadow-xl shadow-gray-200/40 dark:border-gray-800 dark:bg-dark-surface dark:shadow-black/20 md:p-10"
                 >
-                    <X size={24} />
-                </button>
-
-                <form onSubmit={handleSubmit} className="p-6 md:p-10 max-h-[90vh] overflow-y-auto scrollbar-hide">
                     {/* Header */}
                     <div className="flex items-center space-x-3 md:space-x-4 mb-2">
                         <div className="bg-brand-primary/10 dark:bg-brand-primary/20 p-2 md:p-2.5 rounded-xl text-brand-primary dark:text-brand-primary transition-colors duration-300">
@@ -98,7 +104,7 @@ const CreateJob = () => {
                                         required
                                         name="title"
                                         placeholder="e.g., Senior Frontend Developer"
-                                        className="w-full px-5 py-3.5 bg-gray-50 dark:bg-dark-main border border-transparent dark:border-gray-800 rounded-2xl focus:bg-white dark:focus:bg-dark-surface focus:border-brand-primary focus:ring-2 focus:ring-brand-primary transition-all font-medium placeholder:text-gray-300 dark:placeholder:text-gray-600 text-gray-900 dark:text-white"
+                                        className={fieldClassName}
                                         value={formData.title}
                                         onChange={handleChange}
                                     />
@@ -110,7 +116,7 @@ const CreateJob = () => {
                                         required
                                         name="department"
                                         placeholder="e.g., Engineering"
-                                        className="w-full px-5 py-3.5 bg-gray-50 dark:bg-dark-main border border-transparent dark:border-gray-800 rounded-2xl focus:bg-white dark:focus:bg-dark-surface focus:border-brand-primary focus:ring-2 focus:ring-brand-primary transition-all font-medium placeholder:text-gray-300 dark:placeholder:text-gray-600 text-gray-900 dark:text-white"
+                                        className={fieldClassName}
                                         value={formData.department}
                                         onChange={handleChange}
                                     />
@@ -124,7 +130,7 @@ const CreateJob = () => {
                                             required
                                             name="location"
                                             placeholder="e.g., Remote, New York, N"
-                                            className="w-full pl-12 pr-5 py-3.5 bg-gray-50 dark:bg-dark-main border border-transparent dark:border-gray-800 rounded-2xl focus:bg-white dark:focus:bg-dark-surface focus:border-brand-primary focus:ring-2 focus:ring-brand-primary transition-all font-medium placeholder:text-gray-300 dark:placeholder:text-gray-600 text-gray-900 dark:text-white"
+                                            className={`${fieldClassName} pl-12 pr-5`}
                                             value={formData.location}
                                             onChange={handleChange}
                                         />
@@ -136,7 +142,7 @@ const CreateJob = () => {
                                     <div className="relative">
                                         <select
                                             name="type"
-                                            className="w-full px-5 py-3.5 bg-gray-50 dark:bg-dark-main border border-transparent dark:border-gray-800 text-gray-900 dark:text-white rounded-2xl focus:bg-white dark:focus:bg-dark-surface focus:border-brand-primary focus:ring-2 focus:ring-brand-primary transition-all font-medium appearance-none"
+                                            className={selectClassName}
                                             value={formData.type}
                                             onChange={handleChange}
                                         >
@@ -157,7 +163,7 @@ const CreateJob = () => {
                                             required
                                             name="salaryRange"
                                             placeholder="e.g., $120,000 - $160,000"
-                                            className="w-full pl-12 pr-5 py-3.5 bg-gray-50 dark:bg-dark-main border border-transparent dark:border-gray-800 text-gray-900 dark:text-white rounded-2xl focus:bg-white dark:focus:bg-dark-surface focus:border-brand-primary focus:ring-2 focus:ring-brand-primary transition-all font-medium placeholder:text-gray-300 dark:placeholder:text-gray-600"
+                                            className={`${fieldClassName} pl-12 pr-5`}
                                             value={formData.salaryRange}
                                             onChange={handleChange}
                                         />
@@ -179,7 +185,7 @@ const CreateJob = () => {
                                     name="description"
                                     rows={4}
                                     placeholder="Describe the role, key responsibilities, team culture, and what makes this opportunity exciting..."
-                                    className="w-full px-5 py-4 bg-gray-50 dark:bg-dark-main border border-transparent dark:border-gray-800 text-gray-900 dark:text-white rounded-2xl focus:bg-white dark:focus:bg-dark-surface focus:border-brand-primary focus:ring-2 focus:ring-brand-primary transition-all text-sm leading-relaxed placeholder:text-gray-300 dark:placeholder:text-gray-600"
+                                    className={textAreaClassName}
                                     value={formData.description}
                                     onChange={handleChange}
                                 />
@@ -199,7 +205,7 @@ const CreateJob = () => {
                                     name="requirements"
                                     rows={3}
                                     placeholder="Enter skills separated by commas. For example: React, TypeScript, 5+ years experience, Node.js..."
-                                    className="w-full px-5 py-4 bg-gray-50 dark:bg-dark-main border-2 border-transparent dark:border-gray-800 text-gray-900 dark:text-white rounded-2xl focus:bg-white dark:focus:bg-dark-surface focus:border-brand-primary focus:ring-2 focus:ring-brand-primary transition-all text-sm leading-relaxed placeholder:text-gray-300 dark:placeholder:text-gray-600"
+                                    className={textAreaClassName}
                                     value={formData.requirements}
                                     onChange={handleChange}
                                 />
@@ -213,13 +219,13 @@ const CreateJob = () => {
                                 <Zap className="text-brand-secondary dark:text-brand-secondary transition-colors" size={20} />
                                 <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 transition-colors">Additional Details</h3>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-3">
                                 <div>
                                     <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 transition-colors">Experience Level</label>
                                     <div className="relative">
                                         <select
                                             name="experienceLevel"
-                                            className="w-full px-5 py-3.5 bg-gray-50 dark:bg-dark-main border border-transparent dark:border-gray-800 text-gray-900 dark:text-white rounded-2xl focus:bg-white dark:focus:bg-dark-surface focus:border-brand-primary focus:ring-2 focus:ring-brand-primary transition-all font-medium appearance-none"
+                                            className={selectClassName}
                                             value={formData.experienceLevel}
                                             onChange={handleChange}
                                         >
@@ -232,24 +238,48 @@ const CreateJob = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 transition-colors">Job Category</label>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 transition-colors">Job Category *</label>
                                     <div className="relative">
                                         <select
                                             name="category"
-                                            className="w-full px-5 py-3.5 bg-gray-50 dark:bg-dark-main border border-transparent dark:border-gray-800 text-gray-900 dark:text-white rounded-2xl focus:bg-white dark:focus:bg-dark-surface focus:border-brand-primary focus:ring-2 focus:ring-brand-primary transition-all font-medium appearance-none"
+                                            required
+                                            className={selectClassName}
                                             value={formData.category}
                                             onChange={handleChange}
                                         >
-                                            <option>Engineering</option>
-                                            <option>Design</option>
-                                            <option>Product</option>
-                                            <option>Marketing</option>
-                                            <option>Sales</option>
+                                            <option value="" disabled>Select a job category</option>
+                                            {JOB_CATEGORY_LABELS.map((category) => (
+                                                <option key={category} value={category}>{category}</option>
+                                            ))}
+                                        </select>
+                                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" size={18} />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 transition-colors">Job Subcategory *</label>
+                                    <div className="relative">
+                                        <select
+                                            name="subcategory"
+                                            required
+                                            disabled={!formData.category}
+                                            className={`${selectClassName} disabled:cursor-not-allowed disabled:opacity-60`}
+                                            value={formData.subcategory}
+                                            onChange={handleChange}
+                                        >
+                                            <option value="" disabled>
+                                                {formData.category ? 'Select a subcategory' : 'Choose category first'}
+                                            </option>
+                                            {availableSubcategories.map((subcategory) => (
+                                                <option key={subcategory} value={subcategory}>{subcategory}</option>
+                                            ))}
                                         </select>
                                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" size={18} />
                                     </div>
                                 </div>
                             </div>
+                            <p className="mb-8 text-xs text-gray-500 dark:text-gray-400">
+                                Select a main category first, then choose the professional subcategory that best matches this role.
+                            </p>
 
                             {/* AI Enabled Banner */}
                              <div className="bg-brand-primary/5 dark:bg-brand-primary/10 border border-brand-primary/20 dark:border-brand-primary/30 p-5 rounded-2xl flex items-start space-x-4 transition-colors">
@@ -268,7 +298,7 @@ const CreateJob = () => {
 
                     {/* Footer Buttons */}
                     <div className="flex items-center space-x-4 mt-12 pt-8 border-t border-gray-50 dark:border-gray-800 transition-colors">
-                         <button
+                        <button
                             type="submit"
                             disabled={loading}
                             className="flex-1 bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent text-white py-4 rounded-2xl font-bold flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:opacity-70 active:scale-95"

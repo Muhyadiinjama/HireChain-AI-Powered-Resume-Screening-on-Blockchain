@@ -16,7 +16,7 @@ const createJob = async (req, res) => {
             return res.status(401).json({ success: false, message: 'Authentication error: User not fully registered in database' });
         }
 
-        const { title, description, location, type, salaryRange, tags, department, experienceLevel, category } = req.body;
+        const { title, description, location, type, salaryRange, tags, department, experienceLevel, category, subcategory } = req.body;
 
         const job = new Job({
             title,
@@ -29,6 +29,7 @@ const createJob = async (req, res) => {
             department: department || 'Engineering',
             experienceLevel: experienceLevel || 'Mid Level (2-5 years)',
             category: category || 'Engineering',
+            subcategory: subcategory || '',
             createdBy: req.dbUser._id,
             applicationLink: '/upload'
         });
