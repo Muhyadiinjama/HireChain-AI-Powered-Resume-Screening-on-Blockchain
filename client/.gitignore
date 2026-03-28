@@ -1,0 +1,10 @@
+node_modules/
+dist/
+dist-ssr/
+coverage/
+.vite/
+.cache/
+*.local
+.env
+.env.*
+!.env.example

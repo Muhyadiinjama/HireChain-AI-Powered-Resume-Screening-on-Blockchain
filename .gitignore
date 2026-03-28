@@ -14,9 +14,6 @@ server/.env.*
 *.key
 service-account*.json
 firebase-adminsdk*.json
-!.env.example
-!client/.env.example
-!server/.env.example
 
 # Build output
 dist/

@@ -12,8 +12,6 @@ The shared Render blueprint is defined in [`render.yaml`](./render.yaml).
 Push the whole repository to GitHub, including:
 
 - `render.yaml`
-- `server/.env.example`
-- `client/.env.example`
 
 ## 2. Create the Render Blueprint
 
@@ -30,8 +28,6 @@ This will create:
 - `hirechain-web`
 
 ## 3. Fill in the server environment variables
-
-Use [`server/.env.example`](./server/.env.example) as the reference.
 
 Required for the API:
 
@@ -66,8 +62,6 @@ BLOCKCHAIN_REQUIRE_ONCHAIN=false
 ```
 
 ## 4. Fill in the client environment variables
-
-Use [`client/.env.example`](./client/.env.example) as the reference.
 
 Required for the frontend:
 
