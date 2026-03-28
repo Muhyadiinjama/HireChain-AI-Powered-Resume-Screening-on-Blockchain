@@ -10,6 +10,10 @@ client/.env
 client/.env.*
 server/.env
 server/.env.*
+*.pem
+*.key
+service-account*.json
+firebase-adminsdk*.json
 !.env.example
 !client/.env.example
 !server/.env.example
@@ -54,3 +58,4 @@ Thumbs.db
 client/node_modules/.vite/
 client/.vitest/
 server/.nyc_output/
+.render/

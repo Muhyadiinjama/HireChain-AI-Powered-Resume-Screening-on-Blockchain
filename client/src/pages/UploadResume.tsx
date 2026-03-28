@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
     FileText, Sparkles, CheckCircle2, 
     Briefcase, MapPin, DollarSign, Clock, Users,
-    User, Link as LinkIcon, GraduationCap, Code, FileSignature, HelpCircle, Building2, UploadCloud, Shield, Check
+    User, Link as LinkIcon, GraduationCap, Code, FileSignature, Building2, UploadCloud, Shield, Check
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getJobById, screenResume } from '../services/api';
@@ -28,7 +28,7 @@ const UploadResume = () => {
         recentRole: '', recentCompany: '', experience: '',
         educationLevel: '', fieldOfStudy: '', gradYear: '',
         technicalSkills: '', languages: '',
-        coverLetter: '', availability: '', expectedSalary: '', authorization: '', relocate: ''
+        coverLetter: ''
     });
 
     useEffect(() => {
@@ -136,8 +136,6 @@ Portfolio: ${formData.portfolio}
             formData.experience,
             formData.educationLevel,
             formData.technicalSkills,
-            formData.availability,
-            formData.authorization,
             file,
             consentAccepted
         ];
@@ -153,8 +151,10 @@ Portfolio: ${formData.portfolio}
 
     const progressValue = calculateProgress();
 
-    const inputClass = "w-full bg-[#f8fafc] dark:bg-dark-main border border-transparent dark:border-gray-800 focus:bg-white dark:focus:bg-dark-surface focus:border-brand-primary rounded-xl px-4 py-3 text-sm transition-all outline-none text-gray-700 dark:text-white shadow-sm hover:border-gray-200 dark:hover:border-gray-700";
-    const labelClass = "block text-[13px] font-bold text-gray-700 dark:text-gray-300 mb-1.5 transition-colors duration-300";
+    const inputClass = "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-medium text-slate-800 shadow-sm outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 dark:border-gray-700 dark:bg-dark-main/65 dark:text-white dark:placeholder:text-gray-500 dark:hover:border-gray-600 dark:focus:border-brand-primary dark:focus:ring-brand-primary/15";
+    const labelClass = "mb-2 block text-[12px] font-black uppercase tracking-[0.16em] text-slate-600 transition-colors duration-300 dark:text-gray-300";
+    const sectionCardClass = "rounded-[28px] border border-slate-200/80 bg-slate-50/80 p-5 shadow-sm transition-colors duration-300 dark:border-gray-800 dark:bg-dark-main/35 md:p-6";
+    const sectionTitleClass = "mb-5 flex items-center text-lg font-black text-slate-900 transition-colors duration-300 dark:text-white";
 
     return (
         <div className="min-h-screen bg-[#f8faff] dark:bg-dark-main font-sans pb-20 transition-colors duration-300">
@@ -257,11 +257,11 @@ Portfolio: ${formData.portfolio}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
                         onSubmit={handleSubmit} 
-                        className="bg-white dark:bg-dark-surface rounded-[28px] md:rounded-[32px] p-5 md:p-8 shadow-sm border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-200 transition-colors duration-300"
+                        className="rounded-[28px] border border-slate-200/80 bg-white p-5 text-gray-800 shadow-xl shadow-slate-200/40 transition-colors duration-300 dark:border-gray-800 dark:bg-dark-surface dark:text-gray-200 dark:shadow-black/10 md:rounded-[32px] md:p-8"
                     >
                         <div className="mb-6 md:mb-8">
-                            <h2 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white flex items-center"><FileSignature className="mr-3 text-brand-primary dark:text-brand-primary" /> Application Form</h2>
-                            <p className="text-gray-500 dark:text-gray-400 text-xs md:text-sm mt-2">Fill out all required fields to submit your application. Fields marked with * are required.</p>
+                            <h2 className="flex items-center text-xl font-black text-gray-900 dark:text-white md:text-2xl"><FileSignature className="mr-3 text-brand-primary dark:text-brand-primary" /> Application Form</h2>
+                            <p className="mt-2 text-sm font-medium text-slate-500 dark:text-gray-400">Fill out the required fields below to submit a clear, complete application.</p>
                         </div>
 
                         <div className="space-y-10">
@@ -271,8 +271,9 @@ Portfolio: ${formData.portfolio}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.4 }}
+                                className={sectionCardClass}
                             >
-                                <h3 className="text-lg font-bold flex items-center mb-5"><User size={20} className="mr-2 text-brand-primary dark:text-brand-primary bg-brand-primary/10 dark:bg-brand-primary/20 p-1 rounded-md" /> Personal Information</h3>
+                                <h3 className={sectionTitleClass}><User size={20} className="mr-2 rounded-md bg-brand-primary/10 p-1 text-brand-primary dark:bg-brand-primary/20 dark:text-brand-primary" /> Personal Information</h3>
                                 <div className="grid md:grid-cols-2 gap-5">
                                     <div>
                                         <label className={labelClass}>First Name *</label>
@@ -304,8 +305,9 @@ Portfolio: ${formData.portfolio}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.4 }}
+                                className={sectionCardClass}
                             >
-                                <h3 className="text-lg font-bold flex items-center mb-5"><LinkIcon size={20} className="mr-2 text-brand-secondary dark:text-brand-secondary bg-brand-secondary/10 dark:bg-brand-secondary/20 p-1 rounded-md" /> Professional Links</h3>
+                                <h3 className={sectionTitleClass}><LinkIcon size={20} className="mr-2 rounded-md bg-brand-secondary/10 p-1 text-brand-secondary dark:bg-brand-secondary/20 dark:text-brand-secondary" /> Professional Links</h3>
                                 <div className="space-y-5">
                                     <div>
                                         <label className={labelClass}>LinkedIn Profile</label>
@@ -329,8 +331,9 @@ Portfolio: ${formData.portfolio}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.4 }}
+                                className={sectionCardClass}
                             >
-                                <h3 className="text-lg font-bold flex items-center mb-5"><Briefcase size={20} className="mr-2 text-emerald-600 dark:text-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 p-1 rounded-md" /> Professional Background</h3>
+                                <h3 className={sectionTitleClass}><Briefcase size={20} className="mr-2 rounded-md bg-emerald-50 p-1 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-500" /> Professional Background</h3>
                                 <div className="grid md:grid-cols-2 gap-5">
                                     <div>
                                         <label className={labelClass}>Current/Most Recent Role *</label>
@@ -361,8 +364,9 @@ Portfolio: ${formData.portfolio}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.4 }}
+                                className={sectionCardClass}
                             >
-                                <h3 className="text-lg font-bold flex items-center mb-5"><GraduationCap size={20} className="mr-2 text-indigo-500 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 p-1 rounded-md" /> Education</h3>
+                                <h3 className={sectionTitleClass}><GraduationCap size={20} className="mr-2 rounded-md bg-indigo-50 p-1 text-indigo-500 dark:bg-indigo-900/30 dark:text-indigo-400" /> Education</h3>
                                 <div className="grid md:grid-cols-2 gap-5">
                                     <div>
                                         <label className={labelClass}>Highest Education Level *</label>
@@ -392,8 +396,9 @@ Portfolio: ${formData.portfolio}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.4 }}
+                                className={sectionCardClass}
                             >
-                                <h3 className="text-lg font-bold flex items-center mb-5"><Code size={20} className="mr-2 text-brand-accent dark:text-brand-accent bg-brand-accent/10 dark:bg-brand-accent/20 p-1 rounded-md" /> Skills & Languages</h3>
+                                <h3 className={sectionTitleClass}><Code size={20} className="mr-2 rounded-md bg-brand-accent/10 p-1 text-brand-accent dark:bg-brand-accent/20 dark:text-brand-accent" /> Skills & Languages</h3>
                                 <div className="space-y-5">
                                     <div>
                                         <label className={labelClass}>Technical Skills *</label>
@@ -411,12 +416,13 @@ Portfolio: ${formData.portfolio}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.4 }}
+                                className={sectionCardClass}
                             >
-                                <h3 className="text-lg font-bold flex items-center mb-5"><FileText size={20} className="mr-2 text-pink-500 dark:text-pink-400 bg-pink-50 dark:bg-pink-900/30 p-1 rounded-md" /> Resume & Documents</h3>
+                                <h3 className={sectionTitleClass}><FileText size={20} className="mr-2 rounded-md bg-pink-50 p-1 text-pink-500 dark:bg-pink-900/30 dark:text-pink-400" /> Resume & Documents</h3>
                                 <label className={labelClass}>Upload your resume for AI analysis *</label>
                                 <motion.div 
                                     whileHover={{ scale: 1.005 }}
-                                    className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-[28px] md:rounded-3xl p-6 md:p-10 text-center hover:border-brand-primary dark:hover:border-brand-primary transition-all bg-[#f8fafc] dark:bg-gray-900 group relative cursor-pointer"
+                                    className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-[28px] md:rounded-3xl p-6 md:p-10 text-center hover:border-brand-primary dark:hover:border-brand-primary/70 transition-all bg-[#f8fafc] dark:bg-dark-main/45 group relative cursor-pointer"
                                 >
                                     <input type="file" required accept=".pdf,.doc,.docx" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onChange={handleFileChange} />
                                     <div className="flex flex-col items-center">
@@ -437,7 +443,7 @@ Portfolio: ${formData.portfolio}
                                         )}
                                     </div>
                                 </motion.div>
-                                <div className="mt-4 bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-2xl flex items-start space-x-3 text-sm text-blue-700 dark:text-blue-300">
+                                <div className="mt-4 flex items-start space-x-3 rounded-2xl bg-blue-50/70 p-4 text-sm font-medium text-blue-700 dark:bg-blue-900/10 dark:text-blue-300">
                                     <Sparkles size={18} className="text-blue-500 mt-0.5 shrink-0" />
                                     <p>The uploaded resume is converted to text on the server, anonymized, and then sent to the AI for skill and fit analysis.</p>
                                 </div>
@@ -450,8 +456,9 @@ Portfolio: ${formData.portfolio}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.4 }}
+                                className={sectionCardClass}
                             >
-                                <h3 className="text-lg font-bold flex items-center mb-5"><FileSignature size={20} className="mr-2 text-brand-primary dark:text-brand-primary bg-brand-primary/10 dark:bg-brand-primary/20 p-1 rounded-md" /> Cover Letter</h3>
+                                <h3 className={sectionTitleClass}><FileSignature size={20} className="mr-2 rounded-md bg-brand-primary/10 p-1 text-brand-primary dark:bg-brand-primary/20 dark:text-brand-primary" /> Cover Letter</h3>
                                 <div>
                                     <div className="flex justify-between items-center mb-1.5">
                                         <label className={labelClass}>Why are you interested in this role?</label>
@@ -459,51 +466,6 @@ Portfolio: ${formData.portfolio}
                                     </div>
                                     <textarea rows={4} className={inputClass} placeholder="Share your motivation, relevant experience that makes you a great fit, and how you see yourself contributing to the team. Be specific and authentic..." onChange={(e) => setFormData({...formData, coverLetter: e.target.value})}></textarea>
                                     <p className="text-gray-400 dark:text-gray-500 text-xs mt-2 text-right">0 / 2000 words</p>
-                                </div>
-                            </motion.div>
-
-                            <hr className="border-gray-100 dark:border-gray-800" />
-
-                            <motion.div 
-                                initial={{ opacity: 0, x: -10 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.4 }}
-                            >
-                                <h3 className="text-lg font-bold flex items-center mb-5"><HelpCircle size={20} className="mr-2 text-brand-accent dark:text-brand-accent bg-brand-accent/10 dark:bg-brand-accent/20 p-1 rounded-md" /> Additional Information</h3>
-                                <div className="grid md:grid-cols-2 gap-5">
-                                    <div>
-                                        <label className={labelClass}>Availability to Start *</label>
-                                        <select required className={inputClass} onChange={(e) => setFormData({...formData, availability: e.target.value})}>
-                                            <option value="">Select availability</option>
-                                            <option value="immediate">Immediate</option>
-                                            <option value="2weeks">2 Weeks Notice</option>
-                                            <option value="1month">1 Month Notice</option>
-                                            <option value="other">Other</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className={labelClass}>Expected Salary Range</label>
-                                        <input type="text" className={inputClass} placeholder="e.g. $120,000 - $140,000" onChange={(e) => setFormData({...formData, expectedSalary: e.target.value})} />
-                                    </div>
-                                    <div>
-                                        <label className={labelClass}>Work Authorization *</label>
-                                        <select required className={inputClass} onChange={(e) => setFormData({...formData, authorization: e.target.value})}>
-                                            <option value="">Please select</option>
-                                            <option value="citizen">Citizen / Permanent Resident</option>
-                                            <option value="visa">Require Visa Sponsorship</option>
-                                            <option value="authorized">Authorized to work</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className={labelClass}>Willing to Relocate?</label>
-                                        <select className={inputClass} onChange={(e) => setFormData({...formData, relocate: e.target.value})}>
-                                            <option value="">Please select</option>
-                                            <option value="yes">Yes</option>
-                                            <option value="no">No</option>
-                                            <option value="remote">Remote Only</option>
-                                        </select>
-                                    </div>
                                 </div>
                             </motion.div>
 
@@ -544,7 +506,7 @@ Portfolio: ${formData.portfolio}
 
                         {/* Submit Buttons */}
                         <div className="mt-8 md:mt-10 flex flex-col-reverse sm:flex-row items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-6 md:pt-8 transition-colors duration-300 gap-4">
-                            <button type="button" onClick={() => navigate(-1)} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-all">Cancel</button>
+                            <button type="button" onClick={() => navigate(-1)} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-all">Cancel</button>
                             <motion.button
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}

@@ -22,9 +22,15 @@ if (!admin.apps.length) {
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const allowedOrigins = String(process.env.CORS_ORIGIN || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: allowedOrigins.length ? allowedOrigins : true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

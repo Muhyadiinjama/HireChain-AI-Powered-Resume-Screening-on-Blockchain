@@ -30,6 +30,10 @@ const JobApplicantsPage = () => {
                 return;
             }
 
+            setLoading(true);
+            setJob(null);
+            setCandidates([]);
+
             try {
                 const [jobResponse, candidatesResponse] = await Promise.all([
                     getJobById(id),
@@ -37,7 +41,17 @@ const JobApplicantsPage = () => {
                 ]);
 
                 setJob(jobResponse.data.job);
-                setCandidates(candidatesResponse.data.candidates || []);
+                const candidatesForCurrentJob = (candidatesResponse.data.candidates || []).filter((candidate: ScreeningRecord) => {
+                    const linkedJobId =
+                        candidate.candidateId?.jobId?._id ||
+                        candidate.candidate?.jobId?._id ||
+                        candidate.candidateId?.jobId ||
+                        candidate.candidate?.jobId;
+
+                    return linkedJobId === id;
+                });
+
+                setCandidates(candidatesForCurrentJob);
             } catch (error) {
                 console.error('Failed to load job applicants page:', error);
                 toast.error('Unable to load the job applicants page.');

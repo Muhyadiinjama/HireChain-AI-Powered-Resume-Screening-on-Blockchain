@@ -35,8 +35,6 @@ const register = async (req, res) => {
             userName = name;
         }
 
-        console.log(`Processing registration for UID: ${uid}, Email: ${userEmail}`);
-
         // Simplified registration: always upsert with the provided details
         const user = await User.findOneAndUpdate(
             { firebaseUID: uid },
@@ -51,7 +49,6 @@ const register = async (req, res) => {
             { returnDocument: 'after', upsert: true, runValidators: true, setDefaultsOnInsert: true }
         );
 
-        console.log('User synced in MongoDB:', user._id);
         res.status(201).json({ success: true, user });
     } catch (error) {
         console.error('Registration Error:', error.stack);
@@ -72,8 +69,6 @@ const login = async (req, res) => {
         // Verify Firebase Token
         const decodedToken = await admin.auth().verifyIdToken(token);
         const { uid, email, name } = decodedToken;
-        console.log(`Login attempt for UID: ${uid}`);
-
         // Check if user exists first to avoid unnecessary updates
         let user = await User.findOne({ firebaseUID: uid });
 
@@ -92,7 +87,6 @@ const login = async (req, res) => {
             );
         }
 
-        console.log(`User found/logged in: ${user.email}`);
         res.status(200).json({ success: true, user });
     } catch (error) {
         console.error('Login Error:', error.stack);

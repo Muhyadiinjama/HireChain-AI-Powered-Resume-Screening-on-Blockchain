@@ -7,11 +7,6 @@ const {
 
 const createJob = async (req, res) => {
     try {
-        console.log('--- Job Creation Attempt ---');
-        console.log('Body:', req.body);
-        console.log('User Role:', req.dbUser?.role);
-        console.log('User ID:', req.dbUser?._id);
-
         if (!req.dbUser || !req.dbUser._id) {
             return res.status(401).json({ success: false, message: 'Authentication error: User not fully registered in database' });
         }
@@ -37,7 +32,6 @@ const createJob = async (req, res) => {
         job.applicationLink = `/upload/${job._id}`;
 
         await job.save();
-        console.log('Job saved successfully!');
         res.status(201).json({ success: true, job });
     } catch (error) {
         console.error('Job Creation Detailed Error:', error);
@@ -59,7 +53,9 @@ const createJob = async (req, res) => {
 
 const getJobs = async (req, res) => {
     try {
-        const jobs = await Job.find().populate('createdBy');
+        const jobs = await Job.find()
+            .sort({ createdAt: -1, _id: -1 })
+            .populate('createdBy');
         await backfillJobCompanies(jobs);
         const normalizedJobs = jobs.map((job) => applyResolvedCompany(job));
         res.status(200).json({ success: true, jobs: normalizedJobs });

@@ -14,6 +14,17 @@ import type { Job } from '../types/models';
 const JOB_TYPES = ['All', 'Full-time', 'Part-time', 'Remote', 'Contract', 'Internship'];
 const CATEGORIES = ['All', ...JOB_CATEGORY_LABELS];
 
+const sortJobsNewestFirst = (jobA: Job, jobB: Job) => {
+    const timeA = new Date(jobA.createdAt || 0).getTime();
+    const timeB = new Date(jobB.createdAt || 0).getTime();
+
+    if (timeA !== timeB) {
+        return timeB - timeA;
+    }
+
+    return String(jobB._id || '').localeCompare(String(jobA._id || ''));
+};
+
 const Jobs = () => {
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
@@ -59,17 +70,19 @@ const Jobs = () => {
         navigate(`/upload/${jobId}`);
     };
 
-    const filteredJobs = jobs.filter((job) => {
-        const matchSearch =
-            job.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            job.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            job.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            job.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            job.subcategory?.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchType = selectedType === 'All' || job.type === selectedType;
-        const matchCategory = selectedCategory === 'All' || job.category === selectedCategory;
-        return matchSearch && matchType && matchCategory;
-    });
+    const filteredJobs = jobs
+        .filter((job) => {
+            const matchSearch =
+                job.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                job.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                job.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                job.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                job.subcategory?.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchType = selectedType === 'All' || job.type === selectedType;
+            const matchCategory = selectedCategory === 'All' || job.category === selectedCategory;
+            return matchSearch && matchType && matchCategory;
+        })
+        .sort(sortJobsNewestFirst);
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-dark-main transition-colors duration-300">

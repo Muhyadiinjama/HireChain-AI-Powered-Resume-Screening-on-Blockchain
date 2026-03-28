@@ -53,6 +53,17 @@ type DashboardStat = {
     badge: string;
 };
 
+const sortJobsNewestFirst = (jobA: Job, jobB: Job) => {
+    const timeA = new Date(jobA.createdAt || 0).getTime();
+    const timeB = new Date(jobB.createdAt || 0).getTime();
+
+    if (timeA !== timeB) {
+        return timeB - timeA;
+    }
+
+    return String(jobB._id || '').localeCompare(String(jobA._id || ''));
+};
+
 const Dashboard = () => {
     const [jobs, setJobs] = useState<Job[]>([]);
     const [applications, setApplications] = useState<ApplicationRecord[]>([]);
@@ -261,13 +272,17 @@ const Dashboard = () => {
 
     if (!user) return null;
 
-    const filteredJobs = jobs.filter(job =>
-        job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.company?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    const recruiterManagedJobs = jobs.filter((job) =>
-        user.role === 'admin' || (typeof job.createdBy === 'string' ? job.createdBy === user._id : job.createdBy?._id === user._id)
-    );
+    const filteredJobs = jobs
+        .filter(job =>
+            job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            job.company?.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .sort(sortJobsNewestFirst);
+    const recruiterManagedJobs = jobs
+        .filter((job) =>
+            user.role === 'admin' || (typeof job.createdBy === 'string' ? job.createdBy === user._id : job.createdBy?._id === user._id)
+        )
+        .sort(sortJobsNewestFirst);
 
     const filteredRecruiterCandidates = filterRecruiterCandidates(recruiterCandidates, candidateFilters);
     const scoreDistribution = [
@@ -1208,8 +1223,13 @@ const Dashboard = () => {
                                 {recruiterCandidates.slice(0, 3).map((item, i) => (
                                     <div
                                         key={i}
-                                        onClick={() => window.open(item.blockchain?.explorerUrl || `/verify/${item.blockchain?.hash}`, '_blank')}
-                                        className="bg-white dark:bg-dark-surface p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex items-center justify-between group hover:border-brand-secondary transition-all cursor-pointer hover:shadow-md"
+                                        onClick={() => {
+                                            const verificationTarget = item.blockchain?.explorerUrl || (item.blockchain?.hash ? `/verify/${item.blockchain.hash}` : '');
+                                            if (verificationTarget) {
+                                                window.open(verificationTarget, '_blank');
+                                            }
+                                        }}
+                                        className={`bg-white dark:bg-dark-surface p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex items-center justify-between group transition-all hover:shadow-md ${item.blockchain?.explorerUrl || item.blockchain?.hash ? 'cursor-pointer hover:border-brand-secondary' : 'cursor-default opacity-90'}`}
                                     >
                                         <div className="flex items-center space-x-6">
                                             <div className="bg-brand-secondary/10 dark:bg-brand-secondary/20 text-brand-secondary dark:text-brand-secondary p-4 rounded-2xl group-hover:bg-brand-secondary group-hover:text-white transition-all">
@@ -1223,11 +1243,14 @@ const Dashboard = () => {
                                                 <p className="text-xs text-gray-400 font-medium mb-3 flex items-center"><Clock size={12} className="mr-1.5" />{new Date(item.createdAt).toLocaleString()}</p>
                                                 <p className="text-xs font-mono text-gray-300 dark:text-gray-600 group-hover:text-brand-secondary transition-colors break-all flex items-center">
                                                     <span className="font-bold mr-2 uppercase tracking-tighter text-[10px]">Hash:</span>
-                                                    {item.blockchain?.hash || '0x' + Math.random().toString(16).slice(2, 10) + '...'}
+                                                    {item.blockchain?.hash || 'Hash unavailable'}
                                                 </p>
                                             </div>
                                         </div>
-                                        <button className="p-3 text-gray-400 hover:text-brand-secondary hover:bg-brand-secondary/10 rounded-2xl transition-all">
+                                        <button
+                                            className="p-3 text-gray-400 hover:text-brand-secondary hover:bg-brand-secondary/10 rounded-2xl transition-all disabled:opacity-50"
+                                            disabled={!item.blockchain?.explorerUrl && !item.blockchain?.hash}
+                                        >
                                             <Eye size={20} />
                                         </button>
                                     </div>

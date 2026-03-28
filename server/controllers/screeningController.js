@@ -100,6 +100,7 @@ const screenResume = async (req, res) => {
             resumeText: anonymizedResume.anonymizedText,
             candidateProfileText: anonymizedProfile.anonymizedText,
             jobDescription: jobContext,
+            requiredSkills: job.tags || [],
         });
 
         const candidate = new Candidate({
@@ -184,25 +185,36 @@ const getJobCandidates = async (req, res) => {
             return res.status(403).json({ success: false, message: 'Not authorized to view candidates for this job' });
         }
 
-        const screenings = await Screening.find()
+        const candidatesForJob = await Candidate.find({ jobId: req.params.jobId })
+            .populate('userId', 'name email')
             .populate({
-                path: 'candidateId',
-                match: { jobId: req.params.jobId }
-            })
-            .populate({
-                path: 'candidateId',
-                populate: { path: 'jobId' }
+                path: 'jobId',
+                populate: { path: 'createdBy', select: 'company' }
             });
 
-        const filtered = screenings.filter((s) => s.candidateId !== null);
-        filtered.forEach((screening) => normalizeCandidateJob(screening.candidateId));
-        await backfillCandidateJobs(filtered.map((screening) => screening.candidateId));
+        candidatesForJob.forEach((candidate) => normalizeCandidateJob(candidate));
+        await backfillCandidateJobs(candidatesForJob);
 
-        const results = await Promise.all(filtered.map(async (s) => {
-            const log = await BlockchainLog.findOne({ candidateId: s.candidateId._id });
+        if (!candidatesForJob.length) {
+            return res.status(200).json({ success: true, candidates: [] });
+        }
+
+        const candidateIds = candidatesForJob.map((candidate) => candidate._id);
+        const candidateById = new Map(
+            candidatesForJob.map((candidate) => [candidate._id.toString(), candidate])
+        );
+
+        const screenings = await Screening.find({
+            candidateId: { $in: candidateIds }
+        });
+
+        const results = await Promise.all(screenings.map(async (s) => {
+            const normalizedCandidate = candidateById.get(s.candidateId.toString());
+            const log = await BlockchainLog.findOne({ candidateId: s.candidateId });
             return {
                 ...s._doc,
-                candidate: s.candidateId,
+                candidateId: normalizedCandidate,
+                candidate: normalizedCandidate,
                 blockchain: log
             };
         }));

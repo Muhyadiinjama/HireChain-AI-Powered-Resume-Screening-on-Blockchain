@@ -1,4 +1,10 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const {
+    extractSkillsFromSources,
+    findMissingRequiredSkills,
+    mergeUniqueSkills,
+    normalizeSkillKey,
+} = require('./skillExtractionService');
 
 const MODELS = [
     'gemini-2.5-flash',
@@ -62,13 +68,17 @@ const extractJson = (rawText) => {
 };
 
 const normalizeAnalysis = (analysis) => {
-    const safeSkills = Array.isArray(analysis.skills)
-        ? analysis.skills.map((skill) => String(skill).trim()).filter(Boolean)
-        : [];
+    const safeSkills = mergeUniqueSkills(
+        Array.isArray(analysis.skills)
+            ? analysis.skills.map((skill) => String(skill).trim()).filter(Boolean)
+            : []
+    );
 
-    const safeMissingSkills = Array.isArray(analysis.missingSkills)
-        ? analysis.missingSkills.map((skill) => String(skill).trim()).filter(Boolean)
-        : [];
+    const safeMissingSkills = mergeUniqueSkills(
+        Array.isArray(analysis.missingSkills)
+            ? analysis.missingSkills.map((skill) => String(skill).trim()).filter(Boolean)
+            : []
+    );
 
     const numericScore = Number(analysis.score);
     const safeScore = Number.isFinite(numericScore)
@@ -85,7 +95,13 @@ const normalizeAnalysis = (analysis) => {
     };
 };
 
-const buildPrompt = ({ resumeText, jobDescription, candidateProfileText }) => `
+const buildPrompt = ({
+    resumeText,
+    jobDescription,
+    candidateProfileText,
+    requiredSkills,
+    extractedSkillHints
+}) => `
 Analyze the candidate resume against the job description and return ONLY valid JSON.
 Do not wrap the response in markdown or code fences.
 
@@ -100,8 +116,17 @@ Return exactly this JSON shape:
 Rules:
 - Score must be an integer from 0 to 100.
 - The resume and candidate profile text below have already been anonymized. Do not infer identity.
-- Only include concrete skills that are clearly supported by the anonymized resume or candidate profile.
+- Detect skills from BOTH sources below: the uploaded resume text and the candidate profile / form text.
+- The "skills" array should be as complete as possible for technical, tooling, platform, framework, language, database, cloud, blockchain, mobile, DevOps, and analytics skills that are clearly supported by the text.
+- Prefer concrete technical skills such as React, Node.js, Python, Docker, AWS, PostgreSQL, Solidity, TensorFlow, Power BI, and similar tools or technologies.
+- Do not include soft skills unless they are explicitly required technical capabilities.
 - Keep the explanation under 80 words.
+
+Required Job Skills:
+${requiredSkills?.length ? requiredSkills.join(', ') : 'No explicit required skills were provided.'}
+
+Rule-Based Skill Hints From Resume/Form:
+${extractedSkillHints?.length ? extractedSkillHints.join(', ') : 'No deterministic skill hints were detected.'}
 
 Candidate Profile Context:
 ${candidateProfileText || 'No additional candidate profile context provided.'}
@@ -124,11 +149,53 @@ const createQuotaError = (attemptedKeyNames) => {
     return new Error(`Gemini API quota exceeded for the configured project keys.${keyLabel} Enable billing, wait for quota reset, or add a working key as GEMINI_API_KEY_2/GOOGLE_API_KEY.`);
 };
 
-const analyzeWithClient = async ({ genAI, resumeText, jobDescription, candidateProfileText }) => {
+const buildFallbackAnalysis = ({ requiredSkills, extractedSkillHints, reason }) => {
+    const matchedSkills = mergeUniqueSkills(extractedSkillHints);
+    const missingSkills = findMissingRequiredSkills(requiredSkills, matchedSkills);
+    const coverageScore = requiredSkills.length
+        ? Math.round((Math.max(requiredSkills.length - missingSkills.length, 0) / requiredSkills.length) * 100)
+        : Math.min(100, matchedSkills.length * 12);
+
+    return {
+        skills: matchedSkills,
+        score: coverageScore,
+        missingSkills,
+        explanation: reason || (
+            matchedSkills.length
+                ? 'Fallback skill extraction used from the uploaded resume and candidate form.'
+                : 'No supported technical skills were confidently detected from the uploaded resume or candidate form.'
+        ),
+    };
+};
+
+const combineAnalysisWithSkillHints = ({ analysis, extractedSkillHints, requiredSkills }) => {
+    const skills = mergeUniqueSkills(analysis.skills, extractedSkillHints);
+    const missingSkills = mergeUniqueSkills(
+        findMissingRequiredSkills(requiredSkills, skills),
+        analysis.missingSkills.filter((skill) => !skills.some((matchedSkill) => normalizeSkillKey(matchedSkill) === normalizeSkillKey(skill)))
+    );
+
+    return {
+        ...analysis,
+        skills,
+        missingSkills,
+    };
+};
+
+const analyzeWithClient = async ({
+    genAI,
+    resumeText,
+    jobDescription,
+    candidateProfileText,
+    requiredSkills,
+    extractedSkillHints
+}) => {
     const prompt = buildPrompt({
         resumeText,
         jobDescription,
         candidateProfileText,
+        requiredSkills,
+        extractedSkillHints,
     });
 
     let lastError;
@@ -161,11 +228,20 @@ const analyzeResume = async ({
     resumeText = '',
     jobDescription,
     candidateProfileText = '',
+    requiredSkills = [],
 }) => {
     const apiKeys = getApiKeys();
+    const extractedSkillHints = extractSkillsFromSources({
+        resumeText,
+        candidateProfileText,
+    });
 
     if (!apiKeys.length) {
-        throw new Error('No Gemini API key found. Add GEMINI_API_KEY or GEMINI_API_KEY_2 in server/.env.');
+        return buildFallbackAnalysis({
+            requiredSkills,
+            extractedSkillHints,
+            reason: 'Gemini API key is not configured, so fallback skill extraction was used from the uploaded resume and candidate form.'
+        });
     }
 
     const quotaBlockedKeys = [];
@@ -173,11 +249,18 @@ const analyzeResume = async ({
 
     for (const { envName, value } of apiKeys) {
         try {
-            return await analyzeWithClient({
+            const analysis = await analyzeWithClient({
                 genAI: new GoogleGenerativeAI(value),
                 resumeText,
                 jobDescription,
                 candidateProfileText,
+                requiredSkills,
+                extractedSkillHints,
+            });
+            return combineAnalysisWithSkillHints({
+                analysis,
+                extractedSkillHints,
+                requiredSkills,
             });
         } catch (error) {
             const errorMessage = error?.message || '';
@@ -194,10 +277,22 @@ const analyzeResume = async ({
     }
 
     if (quotaBlockedKeys.length === apiKeys.length) {
-        throw createQuotaError(quotaBlockedKeys);
+        return buildFallbackAnalysis({
+            requiredSkills,
+            extractedSkillHints,
+            reason: `${createQuotaError(quotaBlockedKeys).message} Fallback skill extraction was used from the uploaded resume and candidate form.`
+        });
     }
 
-    throw lastError || new Error('Unknown Gemini error');
+    if (lastError) {
+        return buildFallbackAnalysis({
+            requiredSkills,
+            extractedSkillHints,
+            reason: `Gemini analysis failed, so fallback skill extraction was used from the uploaded resume and candidate form. ${lastError.message || ''}`.trim()
+        });
+    }
+
+    return buildFallbackAnalysis({ requiredSkills, extractedSkillHints });
 };
 
 module.exports = { analyzeResume };
