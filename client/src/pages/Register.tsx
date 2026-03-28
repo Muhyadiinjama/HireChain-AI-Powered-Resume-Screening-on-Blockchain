@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Lock, UserPlus, Briefcase, UserCircle, Chrome, Building2 } from 'lucide-react';
-import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider } from '../services/firebase';
+import { Mail, Lock, UserPlus, Briefcase, UserCircle, Building2 } from 'lucide-react';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../services/firebase';
 import { registerUser } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import { formatErrorMessage } from '../utils/errorHandlers';
@@ -38,37 +38,6 @@ const Register = ({ isEmbed = false }: RegisterProps) => {
 
             await refreshUser();
             toast.success('Registration successful! Welcome to the platform.');
-
-            navigate('/dashboard');
-        } catch (err: unknown) {
-            toast.error(formatErrorMessage(err));
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleGoogleSignIn = async () => {
-        setLoading(true);
-        try {
-            if (role === 'recruiter' && !company.trim()) {
-                toast.error('Company name is required for recruiter accounts.');
-                setLoading(false);
-                return;
-            }
-
-            const result = await signInWithPopup(auth, googleProvider);
-            const token = await result.user.getIdToken();
-            await registerUser({
-                token,
-                role,
-                name: result.user.displayName || name,
-                company: company.trim()
-            });
-
-            // For Google sign-in, we might need a way to let them choose role if it's first time
-            // For now, defaulting to chosen role in UI
-            await refreshUser();
-            toast.success('Google registration successful!');
 
             navigate('/dashboard');
         } catch (err: unknown) {
@@ -208,29 +177,10 @@ const Register = ({ isEmbed = false }: RegisterProps) => {
             </form>
 
             {!isEmbed && (
-                <>
-                    <div className="mt-8">
-                        <div className="relative flex items-center justify-center mb-6">
-                            <div className="border-t border-gray-100 dark:border-gray-800 w-full transition-colors duration-300" />
-                            <span className="absolute bg-white dark:bg-dark-main px-4 text-xs text-gray-400 uppercase tracking-widest font-semibold font-sans transition-colors duration-300">Or join with Google</span>
-                        </div>
-
-                        <button
-                            type="button"
-                            onClick={handleGoogleSignIn}
-                            disabled={loading}
-                            className="w-full flex items-center justify-center space-x-3 py-4 bg-white dark:bg-dark-surface rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors border-2 border-gray-100 dark:border-gray-800 font-semibold text-gray-700 dark:text-gray-300 active:scale-95"
-                        >
-                            <Chrome size={22} className="text-red-500" />
-                            <span>Sign up with Google</span>
-                        </button>
-                    </div>
-
-                    <div className="mt-10 text-center text-gray-500 dark:text-gray-400 transition-colors duration-300">
-                        Already have an account?{' '}
-                        <Link to="/login" className="text-brand-primary font-bold hover:underline">Sign In</Link>
-                    </div>
-                </>
+                <div className="mt-10 text-center text-gray-500 dark:text-gray-400 transition-colors duration-300">
+                    Already have an account?{' '}
+                    <Link to="/login" className="text-brand-primary font-bold hover:underline">Sign In</Link>
+                </div>
             )}
         </div>
     );
